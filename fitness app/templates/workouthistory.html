@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Workout History{% endblock %}
+
+{% block main %}
+<div class="container">
+    <h3>Workout History</h3>
+
+    <!-- Top pagination -->
+    <nav aria-label="Top workout history page navigation">
+        <ul class="pagination justify-content-center">
+          <li class="page-item">
+            <form action="/workouthistory" method="post" id="prev-page" style="display: inline;">
+              <input type="hidden" name="prev-page" form="prev-page" value="-1">
+              <button type="submit" form="prev-page" class="btn btn-outline-success">&laquo;</button>
+            </form>
+          </li>
+          {% for page in pages %}
+          <li class="page-item">
+            <form action="/workouthistory" method="post" id="change-page{{ page }}" style="display: inline;">
+              <input type="hidden" name="change-page" form="change-page{{ page }}" value="{{ page }}">
+              <button type="submit" form="change-page{{ page }}" class="btn btn-outline-success">{{ page }}</button>
+            </form>
+          </li>
+          {% endfor %}
+            <form action="/workouthistory" method="post" id="next-page" style="display: inline;">
+              <input type="hidden" name="next-page" form="next-page" value="1">
+              <button type="submit" form="next-page" class="btn btn-outline-success">&raquo;</button>
+            </form>
+          </li>
+        </ul>
+    </nav>
+
+    <!-- workout history table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <!-- date heading with filter button -->
+                <th>
+                  Date
+                  <form action="/workouthistory" method="post" id="date-sort" style="display: inline;">
+                    <input type="hidden" name="date-sort" form="date-sort">
+                    <button type="submit" form="date-sort" class="bi bi-filter-square" style="border: none; background-color: inherit; padding: inherit; display: inline-block;"></button>
+                  </form>
+                </th>
+                <!-- <th>Date</th> -->
+                <th>Start</th>
+                <th>End</th>
+                <!-- empty cell for consistent formatting with table body -->
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for workout in workout_history %}
+                <tr>
+                    <td>{{ workout.date }}</td>
+                    <td>{{ workout.start_time }}</td>
+                    <td>{{ workout.end_time }}</td>
+                    <td>
+                        <form action="/workouthistory" method="post" id="edit-workout{{ workout.id }}" style="display: inline;">
+                            <input type="hidden" name="edit-workout-id" form="edit-workout{{ workout.id }}" value="{{ workout.id }}">
+                            <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-success">Edit</button>
+                        </form>
+                        <form action="/workouthistory" method="post" id="delete-workout{{ workout.id }}" style="display: inline;">
+                            <input type="hidden" name="delete-workout-id" form="delete-workout{{ workout.id }}" value="{{ workout.id }}">
+                            <button type="submit" form="delete-workout{{ workout.id }}" class="btn btn-success">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- bottom pagination -->
+    <nav aria-label="Bottom workout history page navigation">
+      <ul class="pagination justify-content-center">
+        <li class="page-item">
+          <form action="/workouthistory" method="post" id="prev-page" style="display: inline;">
+            <input type="hidden" name="prev-page" form="prev-page" value="-1">
+            <button type="submit" form="prev-page" class="btn btn-outline-success">&laquo;</button>
+          </form>
+        </li>
+        {% for page in pages %}
+        <li class="page-item">
+          <form action="/workouthistory" method="post" id="change-page{{ page }}" style="display: inline;">
+            <input type="hidden" name="change-page" form="change-page{{ page }}" value="{{ page }}">
+            <button type="submit" form="change-page{{ page }}" class="btn btn-outline-success">{{ page }}</button>
+          </form>
+        </li>
+        {% endfor %}
+          <form action="/workouthistory" method="post" id="next-page" style="display: inline;">
+            <input type="hidden" name="next-page" form="next-page" value="1">
+            <button type="submit" form="next-page" class="btn btn-outline-success">&raquo;</button>
+          </form>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- back button -->
+    <button type="button" class="btn btn-success" onclick="history.back()">Back</button>
+</div>
+
+
+
+{% endblock %}

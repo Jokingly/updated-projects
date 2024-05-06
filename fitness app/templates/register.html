@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block main %}
+    <div class="container text-center w-25">
+        <form action="/register" method="post" class="row row-cols-1" id="registration-form">
+            <div class="col">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="username" autocomplete="off">
+            </div>
+            <div class="col">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" form="registration-form" name="password">
+                <div class="form-text">Must contain at least one lowercase letter, uppercase letter, number and symbol.</div>
+            </div>
+            <div class="col">
+                <label for="password_confirmation" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" form="registration-form" name="password_confirmation">
+                <div class="form-text">Must contain at least one lowercase letter, uppercase letter, number and symbol.</div>
+            </div>
+
+            <!-- Move this to separate page to reduce clutter -->
+            <div class="col">
+                <label for="firstname" class="form-label">First Name (Optional)</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="firstname" autocomplete="off">
+            </div>
+            <div class="col">
+                <label for="lastname" class="form-label">Last Name (Optional)</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="lastname" autocomplete="off">
+            </div>
+            <div class="col">
+                <label for="date-of-birth" class="form-label">Date of Birth (Optional)</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="date-of-birth" autocomplete="off" onfocus="this.type='date'" onblur="this.type='text'">
+            </div>
+            <div class="col">
+                <label for="height_cm" class="form-label">Height(CM) (Optional)</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="height" autocomplete="off">
+            </div>
+            <div class="col">
+                <label for="weight_kg" class="form-label">Weight(KG) (Optional)</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="weight" autocomplete="off">
+            </div>
+
+            <!-- Could add more input fields to gather more user information -->
+            <!-- For example, first name, last name and date of birth -->
+            <button type="submit" form="registration-form" class="btn btn-success mt-3">Register</button>
+            <button type="button" class="btn btn-success mt-2" onclick="history.back()">Back</button>
+        </form>
+    </div>
+{% endblock %}
+
+

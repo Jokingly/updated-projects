@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Workout{% endblock %}
+
+{% block main %}
+<div class="container" id="workoutinfo">
+    <ul class="list-group list-group-horizontal justify-content-center">
+        <li class="list-group-item" style="border: none;">Date: {{ workout_info[0].date }}</li>
+        <li class="list-group-item" style="border: none;">Start Time: {{ workout_info[0].start_time }}</li>
+        <li class="list-group-item" style="border: none;">End Time: {{ workout_info[0].end_time }}</li>
+        <button type="button" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#update-form" aria-expanded="false" aria-controls="row">Update</button>
+    </ul>
+
+    <div class="row collapse" id="update-form">
+        <form action="/editworkout" method="post" class="#" id="editworkout-form" autocomplete="off">
+            <label class="form-label" for="editworkout-date">Date</label>
+            <input type="date" class="form-control-sm" name="editworkout-date" id="editworkout-date" value="{{ workout_info[0].date }}">
+            <label class="form-label" for="editworkout-start-time">Start Time</label>
+            <input type="time" class="form-control-sm" name="editworkout-start-time" id="editworkout-start-time" value="{{ workout_info[0].start_time }}">
+            <label class="form-label" for="editworkout-end-time">End Time</label>
+            <input type="time" class="form-control-sm" name="editworkout-end-time" id="editworkout-end-time" value="{{ workout_info[0].end_time }}">
+            <button type="submit" form="editworkout-form" class="btn btn-success">Save</button>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <!-- set input form -->
+    <form action="/editworkout" method="post" class="#" id="add-set" autocomplete="off">
+        <div class="row row-cols-4">
+            <div class="col">
+                <label for="exercise" class="form-label">Exercise</label>
+                <input type="text" class="form-control text-center" name="exercise" id="exercise" form="add-set">
+                <!-- autocomplete list for exercise input box -->
+                <ul id="exercise-list"></ul>
+            </div>
+            <div class="col">
+                <label for="set" class="form-label">Set</label>
+                <input type="number" class="form-control text-center" name="set" id="set" form="add-set">
+            </div>
+            <div class="col">
+                <label for="reps" class="form-label">Reps</label>
+                <input type="number" class="form-control text-center" name="reps" id="reps" form="add-set">
+            </div>
+            <div class="col">
+                <label for="weight" class="form-label">Weight(KG)</label>
+                <input type="number" class="form-control text-center" name="weight" id="weight" form="add-set">
+            </div>
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-success" form="add-set">Log</button>
+        </div>
+    </form>
+
+        <!-- exercise list -->
+        <table class="table" id="current-workout-table">
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Set</th>
+                    <th>Reps</th>
+                    <th>Weight(KG)</th>
+                    <!-- empty cell for consistent table formatting -->
+                    <th></th>
+                </tr>
+            </thead>
+
+            <!-- Add edit or delete button? -->
+            <!-- for loop to insert workout data -->
+            <tbody>
+                {% for set in sets %}
+                    <tr>
+                        <td>{{ set.exercise.title() }}</td>
+                        <td>{{ set.exercise_set }}</td>
+                        <td>{{ set.reps }}</td>
+                        <td>{{ set.weight_kg }}</td>
+                        <!-- delete set button -->
+                        <!-- composite form id targets specific rows for deletion -->
+                        <td>
+                            <form action="/editworkout" method="post" id="delete{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}">
+                                <input type="hidden" form="delete{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="delete-user-id" value="{{ set.user_id }}">
+                                <input type="hidden" form="delete{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="delete-workout-id" value="{{ set.workout_id }}">
+                                <input type="hidden" form="delete{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="delete-exercise-id" value="{{ set.exercise_id }}">
+                                <input type="hidden" form="delete{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="delete-exercise-set" value="{{ set.exercise_set }}">
+                                <button type="submit" form="delete{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" class="btn btn-success btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- using .btn .btn-success styled anchor tag to create button linking to homepage -->
+        <a class="btn btn-success" href="/">Home</a>
+</div>
+{% endblock %}
+

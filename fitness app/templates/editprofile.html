@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ session["user_name"] }}{% endblock %}
+
+{% block main %}
+<div class="container w-25">
+    <form action="/editprofile" method="post" class="row row-cols-2 align-items-center gy-2 m-2" id="edit-profile">
+        <div class="input-group">
+            <label for="edit-first-name" class="form-label col">First name:</label>
+            <input type="text" class="form-control col text-center" id="edit-first-name" name="edit-first-name" form="edit-profile" placeholder="{{ profile_data.first_name }}">
+        </div>
+        <div class="input-group">
+            <label for="edit-last-name" class="form-label col">Last name:</label>
+            <input type="text" class="form-control col text-center" id="edit-last-name" name="edit-last-name" form="edit-profile" placeholder="{{ profile_data.last_name }}">
+        </div>
+        <div class="input-group">
+            <label for="edit-date-of-birth" class="form-label col">Date of birth:</label>
+            <input type="text" class="form-control col text-center" id="edit-date-of-birth" name="edit-date-of-birth" form="edit-profile" placeholder="{{ profile_data.date_of_birth }}" onfocus="this.type='date'" onblur="this.type='text'">
+        </div>
+        <div class="input-group">
+            <label for="edit-height" class="form-label col">Height(CM):</label>
+            <input type="text" class="form-control col text-center" id="edit-height" name="edit-height" form="edit-profile" placeholder="{{ profile_data.height_cm }}">
+        </div>
+        <div class="input-group">
+            <label for="edit-weight" class="form-label col">Weight(KG):</label>
+            <input type="text" class="form-control col text-center" id="edit-weight" name="edit-weight" form="edit-profile" placeholder="{{ profile_data.weight_kg }}">
+        </div>
+    </form>
+    <button type="button" class="btn btn-success" onclick="history.back()">Back</button>
+    <button type="submit" form="edit-profile" class="btn btn-success">Save</button>
+</div>
+{% endblock %}

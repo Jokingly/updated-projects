@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ session["user_name"] }}'s Profile{% endblock %}
+
+{% block main %}
+<div class="container w-25">
+    <table class="table table-sm">
+        <tbody>
+            <tr>
+                <td>User ID:</td>
+                <td>{{ profile_data.id }}</td>
+            </tr>
+            <tr>
+                <td>Member since:</td>
+                <td>{{ profile_data.member_since }}</td>
+            </tr>
+            <tr>
+                <td>Username:</td>
+                <td>{{ profile_data.username }}</td>
+            </tr>
+            <tr>
+                <td>First name:</td>
+                <td>{{ profile_data.first_name }}</td>
+            </tr>
+            <tr>
+                <td>Last name:</td>
+                <td>{{ profile_data.last_name }}</td>
+            </tr>
+            <tr>
+                <td>Date of birth:</td>
+                <td>{{ profile_data.date_of_birth }}</td>
+            </tr>
+            <tr>
+                <td>Height(CM):</td>
+                <td>{{ profile_data.height_cm }}</td>
+            </tr>
+            <tr>
+                <td>Weight(KG):</td>
+                <td>{{ profile_data.weight_kg }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="container">
+        <button type="button" class="btn btn-success" onclick="history.back()">Back</button>
+        <a href="/editprofile" class="btn btn-success">Edit Profile</a>
+        <a href="/changepassword" class="btn btn-success">Change Password</a>
+</div>
+{% endblock %}
