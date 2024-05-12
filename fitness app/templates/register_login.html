@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block main %}
+    <div class="container text-center w-25">
+        <!-- register login post form -->
+        <form action="/register_login" method="post" class="row row-cols-1" id="registration-form">
+            <!-- username -->
+            <div class="col">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control text-center" form="registration-form" name="username" autocomplete="off">
+            </div>
+            <!-- password -->
+            <div class="col">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" form="registration-form" name="password">
+                <div class="form-text">Must contain at least one lowercase letter, uppercase letter, number and symbol.</div>
+            </div>
+            <!-- password confirmation -->
+            <div class="col">
+                <label for="password_confirmation" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" form="registration-form" name="password_confirmation">
+                <div class="form-text">Must match with password above.</div>
+            </div>
+            <!-- email -->
+            <div class="col">
+                <label for="email" class="form-label">E-Mail</label>
+                <input type="email" class="form-control" form="registration-form" name="email">
+                <div class="form-text">Enter a valid e-mail address.</div>
+            </div>
+            
+            <!-- submit button -->
+            <button type="submit" form="registration-form" class="btn btn-success mt-3">Submit</button>
+            <!-- back button -->
+            <button type="button" class="btn btn-success mt-2" onclick="history.back()">Back</button>
+        </form>
+    </div>
+{% endblock %}
+
+

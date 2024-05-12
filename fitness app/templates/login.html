@@ -4,17 +4,19 @@
 
 {% block main %}
     <div class="container text-center w-25">
+        <!-- login form(post) -->
         <form action="/login" method="post" class="row row-cols-1">
-            <!-- <div class="mx-auto w-25"> -->
+            <!-- username -->
             <div class="col">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" class="form-control" name="username" autocomplete="off">
             </div>
-            <!-- <div class="mx-auto w-25"> -->
+            <!-- password -->
             <div class="col">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" name="password">
             </div>
+            <!-- login button -->
             <button type="submit" class="btn btn-success mt-3">Log In</button>
         </form>
     </div>

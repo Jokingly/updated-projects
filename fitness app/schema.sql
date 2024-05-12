@@ -1,27 +1,30 @@
-CREATE TABLE IF NOT EXISTS users (
-          	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          	username TEXT UNIQUE NOT NULL,
-          	hash TEXT NOT NULL,
-			member_since TEXT DEFAULT CURRENT_DATE,
-          	first_name TEXT,
-          	last_name TEXT,
-          	date_of_birth TEXT,
-			height_cm REAL,
-			weight_kg REAL
+CREATE TABLE IF NOT EXISTS user (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	username TEXT UNIQUE NOT NULL,
+	password_hash TEXT NOT NULL,
+	member_since TEXT DEFAULT CURRENT_DATE,
+	first_name TEXT,
+	last_name TEXT,
+	email TEXT,
+	date_of_birth TEXT,
+	height_cm REAL,
+	weight_kg REAL
 );
 
-CREATE TABLE IF NOT EXISTS workouts (
-          	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          	user_id INTEGER NOT NULL,
-          	date TEXT NOT NULL,
-          	start_time TEXT,
-          	end_time TEXT,
-          	FOREIGN KEY (user_id) REFERENCES users (id)
-ON UPDATE CASCADE
-ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS workout (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	user_id INTEGER NOT NULL,
+	date TEXT NOT NULL,
+	start_time TEXT,
+	end_time TEXT,
+	name TEXT,
+	note TEXT,
+	FOREIGN KEY (user_id) REFERENCES user (id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS sets (
+CREATE TABLE IF NOT EXISTS workout_set (
 	user_id INTEGER NOT NULL,
 	workout_id INTEGER NOT NULL,
 	exercise_id INTEGER NOT NULL,
@@ -29,23 +32,58 @@ CREATE TABLE IF NOT EXISTS sets (
 	reps INTEGER NOT NULL,
 	weight_kg REAL NOT NULL,
 	PRIMARY KEY (user_id, workout_id, exercise_id, exercise_set),
-	FOREIGN KEY (user_id) REFERENCES users(id)
+	FOREIGN KEY (user_id) REFERENCES user(id)
 	ON UPDATE CASCADE
 	ON DELETE CASCADE,
-	FOREIGN KEY (exercise_id) REFERENCES exercises(id)
+	FOREIGN KEY (exercise_id) REFERENCES exercise(id)
 	ON UPDATE CASCADE
 	ON DELETE CASCADE,
-	FOREIGN KEY (workout_id) REFERENCES workouts(id)
+	FOREIGN KEY (workout_id) REFERENCES workout(id)
 	ON UPDATE CASCADE
-ON DELETE CASCADE
+	ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS exercises (
-          	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          	exercise TEXT UNIQUE NOT NULL
+CREATE TABLE IF NOT EXISTS muscle_group (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	name TEXT UNIQUE NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS upper_lower (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	name TEXT UNIQUE NOT NULL
+);
 
+CREATE TABLE IF NOT EXISTS push_pull (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS exercise (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	name TEXT UNIQUE NOT NULL,
+	upper_lower_id INTEGER NOT NULL,
+	push_pull_id INTEGER,
+	FOREIGN KEY (upper_lower_id) REFERENCES upper_lower(id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE,
+	FOREIGN KEY (push_pull_id) REFERENCES push_pull(id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS exercise_muscle_group (
+	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	exercise_id INTEGER,
+	muscle_group_id INTEGER,
+	FOREIGN KEY (exercise_id) REFERENCES exercise(id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE,
+	FOREIGN KEY (muscle_group_id) REFERENCES muscle_group(id)
+	ON UPDATE CASCADE
+	ON DELETE CASCADE
+);
+
+-- SQL queries used in app logic
 -- index.html filtering for average workout duration
 WITH durations AS (
 SELECT date, time(end_time, "-"||strftime('%H', start_time)||" hours", "-"||strftime('%M', start_time)||" minutes") workout_duration

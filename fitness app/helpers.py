@@ -14,7 +14,7 @@ def error_message(message, code=400):
                          ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
             s = s.replace(old, new)
         return s
-    return render_template("error_message.html", top=code, bottom=escape(message)), code
+    return render_template("error_message.html", code=code, message=escape(message))
 
 
 # login_required wrapper from CS50
@@ -33,13 +33,12 @@ def login_required(f):
 
 # return user dict from (SQLite3) fitnessapp.db table users. returns None, if there's an error.
 # takes database variable and string as arguments, respectively.
-def retrieve_user(database, username_form_id):
+def retrieve_user(database, username):
         try:
-            # returns first dictionary matching username provided via username_form_id
-            return database.execute("SELECT * FROM users WHERE username = ?;", request.form.get(username_form_id))[0]
+            # retrieve user info from db
+            return database.execute("SELECT * FROM user WHERE username = ?;", username)[0]
 
         except:
-            # return None, if error encountered
             return None
 
 

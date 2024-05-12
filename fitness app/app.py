@@ -1,10 +1,9 @@
-# might not need datetime module
-# import datetime
 import math
 import string
-import sqlite3
+from datetime import datetime
 
-# from cs50 import SQL # Deprecated
+# Keeping cs50 SQL, to save from rewriting all SQL queries (query syntax, outputs(dictonaries to list of tuples))
+from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from helpers import login_required, retrieve_user, error_message
@@ -20,16 +19,8 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# connect to SQLite3 database via CS50 library
-# db = SQL("sqlite:///fitnessapp.db") # # Deprecated
-
-# SQLite3 connection
-try:
-    con = sqlite3.connect("fitnessapp.db")
-    db = con.cursor()
-    print("SQLite3 DB connection successful.")
-except Exception as e:
-    print(f"Error: '{e}'")
+# connect to database
+db = SQL("sqlite:///fitnessapp.db")
 
 
 # referenced from CS50 to not cache responses
@@ -86,26 +77,25 @@ def changepassword():
 @app.route("/createworkout", methods=["GET", "POST"])
 @login_required
 def createworkout():
-    # if workout id already exists in session, append exercises to it
-    if request.method == "POST":
-        # clear session["workout_id"] to create new workout record
-        session.pop("workout_id", None)
+    # clear session["workout_id"] for new workout
+    session.pop("workout_id", None)
 
-        # initialising variables
-        user_id = session.get("user_id")
-        date = request.form.get("date")
-        start_time = request.form.get("start-time")
+    # initialising variables
+    # user id
+    user_id = session.get("user_id")
+    # today's date
+    date = datetime.now().strftime('%Y-%m-%d')
+    # current time
+    start_time = datetime.now().strftime('%H:%M')
 
-        # create row in "workouts" table
-        db.execute("INSERT OR IGNORE INTO workouts (user_id, date, start_time) VALUES (?, ?, ?);", user_id, date, start_time)
+    # insert new workout into SQL workout table
+    db.execute("INSERT OR IGNORE INTO workout (user_id, date, start_time) VALUES (?, ?, ?);", user_id, date, start_time)
 
-        # initialise workout_id with id of newly created workout and save it in session under "workout_id"
-        workout_id = db.execute("SELECT id FROM workouts WHERE user_id = ? AND date = ? AND start_time = ?;", user_id, date, start_time)[0].get("id")
-        session["workout_id"] = workout_id
+    # set session["workout_id"] to newly-created workout
+    workout_id = db.execute("SELECT id FROM workout WHERE user_id = ? AND date = ? AND start_time = ?;", user_id, date, start_time)[0].get("id")
+    session["workout_id"] = workout_id
 
-        return redirect(url_for("editworkout"))
-
-    return render_template("createworkout.html")
+    return redirect(url_for("editworkout"))
 
 
 @app.route("/editprofile", methods=["GET", "POST"])
@@ -164,17 +154,21 @@ def editworkout():
 
     # select workout data via SQL
     sets = db.execute("""
-                            WITH workout_data AS (
-                            SELECT *
-                            FROM sets a
-                            JOIN exercises b ON a.exercise_id=b.id
-                            WHERE a.workout_id = ?
-                            )
+                        WITH workout_data AS (
+                        SELECT *
+                        FROM workout_set a
+                        JOIN exercise b ON a.exercise_id=b.id
+                        WHERE a.workout_id = ?
+                        )
 
-                            SELECT * FROM workout_data GROUP BY exercise, exercise_set;
-    """, workout_id)
+                        SELECT * FROM workout_data GROUP BY name, exercise_set;
+                    """, 
+    workout_id)
 
-    workout_info = db.execute("SELECT * FROM workouts WHERE id = ?;", workout_id)
+    # exercises logged in the workout
+    workout_exercises = {dict["name"] for dict in sets}
+
+    workout_info = db.execute("SELECT * FROM workout WHERE id = ?;", workout_id)
 
     if request.method == "POST":
         # edit date, start- and end time
@@ -183,7 +177,7 @@ def editworkout():
             new_start_time = request.form.get("editworkout-start-time")
             new_end_time = request.form.get("editworkout-end-time")
 
-            db.execute("UPDATE workouts SET date = ?, start_time = ?, end_time = ? WHERE id = ?;", new_date, new_start_time, new_end_time, workout_id)
+            db.execute("UPDATE workout SET date = ?, start_time = ?, end_time = ? WHERE id = ?;", new_date, new_start_time, new_end_time, workout_id)
 
         # delete exercise sets
         elif "delete-user-id" in request.form:
@@ -193,7 +187,7 @@ def editworkout():
                 exercise_id = request.form.get("delete-exercise-id")
                 exercise_set = request.form.get("delete-exercise-set")
 
-                db.execute("DELETE FROM sets WHERE user_id = ? AND workout_id = ? AND exercise_id = ? AND exercise_set = ?;", user_id, workout_id, exercise_id, exercise_set)
+                db.execute("DELETE FROM workout_set WHERE user_id = ? AND workout_id = ? AND exercise_id = ? AND exercise_set = ?;", user_id, workout_id, exercise_id, exercise_set)
 
             except:
                 return error_message("Oops, something went wrong...", 400)
@@ -204,30 +198,33 @@ def editworkout():
                 weight = request.form.get("weight")
                 reps = request.form.get("reps")
                 exercise_set = request.form.get("set")
-                exercise_name = request.form.get("exercise").lower()
-                exercise_id = db.execute("SELECT id FROM exercises WHERE exercise = ?;", exercise_name)[0].get("id")
+                exercise_name = request.form.get("exercise")
+                # exercise_name = request.form.get("exercise").lower()
+                query_result = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name) 
+                exercise_id = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name)[0].get("id")
 
-                # insert row into sets table
-                db.execute("INSERT OR IGNORE INTO sets (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES (?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, exercise_set, reps, weight)
+                # insert row into workout_set table
+                db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES (?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, exercise_set, reps, weight)
 
-            except:
+            except Exception as e:
+                print(e)
                 return error_message("Invalid exercise name.", 400)
 
         return redirect(url_for("editworkout"))
 
-    return render_template("editworkout.html", sets=sets, workout_info=workout_info)
+    return render_template("editworkout.html", sets=sets, workout_exercises=workout_exercises, workout_info=workout_info)
 
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     user_id = session.get("user_id")
-    workout_history = db.execute("SELECT * FROM workouts WHERE user_id = ? ORDER BY date DESC, start_time DESC LIMIT 5;", user_id)
+    workout_history = db.execute("SELECT * FROM workout WHERE user_id = ? ORDER BY date DESC, start_time DESC LIMIT 5;", user_id)
 
     avg_workout_duration_min = db.execute("""
                                             WITH durations AS (
                                             SELECT date, time(end_time, "-"||strftime('%H', start_time)||" hours", "-"||strftime('%M', start_time)||" minutes") workout_duration
-                                            FROM workouts
+                                            FROM workout
                                             WHERE user_id = ?
                                             AND end_time IS NOT NULL
                                             AND start_time IS NOT NULL)
@@ -239,31 +236,31 @@ def index():
     try:
         days_since_last_workout = db.execute("""
                                                 SELECT (JULIANDAY(date('now'))-JULIANDAY(date)) AS days_since_last_workout
-                                                FROM workouts WHERE user_id = ? ORDER BY date DESC LIMIT 1;
+                                                FROM workout WHERE user_id = ? ORDER BY date DESC LIMIT 1;
                                                 """, user_id)[0]["days_since_last_workout"]
     except:
         days_since_last_workout = 0
 
     workouts_last_7_days = db.execute("""
                                             SELECT COUNT(*) AS workouts_last_7_days
-                                            FROM workouts WHERE user_id = ? AND date > DATE(JULIANDAY('now')-7);
+                                            FROM workout WHERE user_id = ? AND date > DATE(JULIANDAY('now')-7);
                                         """, user_id)[0]["workouts_last_7_days"]
 
     workouts_last_30_days = db.execute("""
                                             SELECT COUNT(*) AS workouts_last_30_days
-                                            FROM workouts WHERE user_id = ? AND date > DATE(JULIANDAY('now')-30);
+                                            FROM workout WHERE user_id = ? AND date > DATE(JULIANDAY('now')-30);
                                         """, user_id)[0]["workouts_last_30_days"]
 
     workouts_last_90_days = db.execute("""
                                             SELECT COUNT(*) AS workouts_last_90_days
-                                            FROM workouts WHERE user_id = ? AND date > DATE(JULIANDAY('now')-90);
+                                            FROM workout WHERE user_id = ? AND date > DATE(JULIANDAY('now')-90);
                                         """, user_id)[0]["workouts_last_90_days"]
 
     total_volume_lifted = db.execute("""
                                         SELECT SUM(reps*weight_kg) AS total_volume_lifted
-                                        FROM workouts a
-                                        JOIN sets b ON a.id=b.workout_id
-                                        JOIN exercises c ON b.exercise_id=c.id
+                                        FROM workout a
+                                        JOIN workout_set b ON a.id=b.workout_id
+                                        JOIN exercise c ON b.exercise_id=c.id
                                         WHERE a.user_id = ?;
                                     """, user_id)[0]["total_volume_lifted"]
 
@@ -280,11 +277,11 @@ def index():
     except:
         dashboard["total_volume_lifted"] = 0
 
-
+# TODO: create separate function/url(/delete-workout) for this that redirects to homepage after completion
     if request.method == "POST":
         if "delete-workout-id" in request.form:
             workout_id = request.form.get("delete-workout-id")
-            db.execute("DELETE FROM workouts WHERE user_id = ? AND id = ?;", user_id, workout_id)
+            db.execute("DELETE FROM workout WHERE user_id = ? AND id = ?;", user_id, workout_id)
 
             return redirect(url_for("index"))
 
@@ -304,19 +301,20 @@ def login():
     if request.method == "POST":
         session.clear()
 
-        # store user dictionary from the database in an object
-        user = retrieve_user(db, "username")
+        # user details, retrieved from database
+        request_username = request.form.get("username")
+        user = retrieve_user(db, request_username)
 
-        # check username exists, else return error message
+        # check user info exists
         if user == None:
             return error_message("Invalid user name or password.", 403)
 
         # compare user password with received password via check_password_hash(hashed_password, plain_text_password).
         # if password incorrect, return error message
-        if not check_password_hash(user.get("hash"), request.form.get("password")):
+        if not check_password_hash(user.get("password_hash"), request.form.get("password")):
             return error_message("Invalid user name or password.", 403)
 
-        # if username and password pass, save user id to session
+        # if username and password pass, save user id and username to session
         session["user_id"] = user.get("id")
         session["user_name"] = user.get("username")
 
@@ -339,7 +337,7 @@ def logout():
 @login_required
 def profile():
     user_id = session.get("user_id")
-    profile = db.execute("SELECT * FROM users WHERE id=?;", user_id)[0]
+    profile = db.execute("SELECT * FROM user WHERE id=?;", user_id)[0]
 
     profile_data = dict()
     profile_data["id"] = profile.get("id")
@@ -354,49 +352,99 @@ def profile():
     return render_template("profile.html", profile_data=profile_data)
 
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
+@app.route("/register_login", methods=["GET", "POST"])
+def register_login():
+
+    # post form - login details and email
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
         password_confirmation = request.form.get("password_confirmation")
+        email = request.form.get("email")
+ 
+        # check, if password matches password_confirmation
+        if password != password_confirmation:
+            flash("Password needs to match Confirm Password.")
+            return render_template("register_login.html")
+
+        """
+            check password strength
+            password must contain at least one of each:
+                - lowercase letter
+                - uppercase letter
+                - number
+                - symbol
+
+            using generators for efficiency
+        """
+        if (not any(character in password for character in list(string.digits)) or
+            not any(character in password for character in list(string.ascii_lowercase)) or
+            not any(character in password for character in list(string.ascii_uppercase)) or
+            not any(character in password for character in list(string.punctuation))):
+            flash("Password needs to contain at least one lowercase letter, uppercase letter, number and symbol.")
+            return render_template("register_login.html")
+
+        # check, if username is taken
+        if retrieve_user(db, "username") != None:
+            flash("Username already taken. Please choose another one.")
+            return render_template("register_login.html")
+
+        # create new user in database
+        try:
+            db.execute("""INSERT INTO user (username, password_hash, email) VALUES (?, ?, ?);""",
+                        username, generate_password_hash(password), email)
+        except:
+            flash("Error encountered, please try again.\nIf error persists, kindly contact support.")
+            return render_template("register_login.html")
+        
+        # login newly-created user
+        session.clear()
+        user = retrieve_user(db, username)
+
+        # check user info exists
+        if user == None:
+            return error_message("Invalid user name or password.", 403)
+
+        # save user id and user name to session
+        session["user_id"] = user.get("id")
+        session["user_name"] = user.get("username")
+
+        # redirect to register details page.
+        return redirect(url_for("register_details"))
+
+    return render_template("register_login.html")
+
+@app.route("/register_details", methods=["GET", "POST"])
+def register_details():
+
+    print(f"PRINT USER ID: {session.get("user_id")}")
+
+    # post form - profile details
+    if request.method == "POST":
+        user_id = session.get("user_id")
         first_name = request.form.get("firstname")
         last_name = request.form.get("lastname")
         date_of_birth = request.form.get("date-of-birth")
         height = request.form.get("height")
         weight = request.form.get("weight")
 
-        # if password and password_confirmation mismatch, return error
-        if password != password_confirmation:
-            flash("Password needs to match Confirm Password.")
-            return render_template("register.html")
+        # update user record
+        db.execute("""
+                        UPDATE user
+                        SET first_name = ?,
+                            last_name = ?,
+                            date_of_birth = ?,
+                            height_cm = ?,
+                            weight_kg = ?
+                        WHERE id = ?
+                        ;
+                    """,
+                    first_name, last_name, date_of_birth, height, weight, user_id)
 
-        # check if password contains at least one lowercase letter, uppercase letter, number and symbol
-        # using generators for efficiency
-        if (not any(character in password for character in list(string.digits)) or
-            not any(character in password for character in list(string.ascii_lowercase)) or
-            not any(character in password for character in list(string.ascii_uppercase)) or
-            not any(character in password for character in list(string.punctuation))):
-            flash("Password needs to contain at least one lowercase letter, uppercase letter, number and symbol.")
-            return render_template("register.html")
-
-        # if username already taken (exists in database), return error
-        if retrieve_user(db, "username") != None:
-            flash("Username already taken. Please choose another one.")
-            return render_template("register.html")
-
-        # ====================================== TROUBLE SHOOTING ======================================
-        # upon passing above tests, create new user
-        # this is done by inserting the username and password in the users table
-        db.execute("""INSERT INTO users
-                    (username, hash, first_name, last_name, date_of_birth, height_cm, weight_kg)
-                    VALUES (?, ?, ?, ?, ?, ?, ?);""",
-                    (username, generate_password_hash(password), first_name, last_name, date_of_birth, height, weight))
-
-        # Upon successful registration redirect to homepage.
+        # redirect to homepage
         return redirect(url_for("index"))
 
-    return render_template("register.html")
+    return render_template("register_details.html")
 
 
 @app.route("/workouthistory", methods=["GET", "POST"])
@@ -405,7 +453,7 @@ def workouthistory():
     user_id = session.get("user_id")
 
     # pagination - workout history, showing 10 workouts per page
-    workouts_sum = db.execute("SELECT COUNT() sum FROM workouts WHERE user_id = ?;", user_id)[0].get("sum")
+    workouts_sum = db.execute("SELECT COUNT() sum FROM workout WHERE user_id = ?;", user_id)[0].get("sum")
     workouts_per_page = 10
     number_of_pages = math.ceil(workouts_sum / workouts_per_page)
     pages = list(range(1, number_of_pages + 1))
@@ -430,7 +478,7 @@ def workouthistory():
                                     date,
                                     start_time,
                                     end_time
-                                    FROM workouts
+                                    FROM workout
                                     WHERE user_id = ?
                                     )
                                     SELECT * FROM t WHERE row_num > ? AND row_num <= ?;
@@ -445,7 +493,7 @@ def workouthistory():
                                     date,
                                     start_time,
                                     end_time
-                                    FROM workouts
+                                    FROM workout
                                     WHERE user_id = ?
                                     )
                                     SELECT * FROM t WHERE row_num > ? AND row_num <= ?;
@@ -456,7 +504,7 @@ def workouthistory():
     if request.method == "POST":
         if "delete-workout-id" in request.form:
             workout_id = request.form.get("delete-workout-id")
-            db.execute("DELETE FROM workouts WHERE user_id=? AND id=?", user_id, workout_id)
+            db.execute("DELETE FROM workout WHERE user_id=? AND id=?", user_id, workout_id)
 
             return redirect(url_for("workouthistory"))
 

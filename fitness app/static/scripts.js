@@ -1,17 +1,3 @@
-// createworkout.html scripts
-
-// creatworkout.html prepopulate date- and time input fields
-document.addEventListener("DOMContentLoaded", function() {
-    // createworkout.html - Prepopulate date input field with current date
-    document.querySelector("#date").valueAsDate = new Date();
-
-    // createworkout.html - Prepopulate time input field with current time
-    let today = new Date().toISOString().substr(11, 5);
-    document.querySelector("#start-time").value = today;
-
-});
-
-
 // editworkout.html scripts
 
 // editworkout.html clicking suggestion fills input box
@@ -25,32 +11,36 @@ function displayName(value) {
     exerciseListElement.innerHTML = "";
 }
 
+
+
 // editworkout.html autocomplete list
 document.addEventListener("DOMContentLoaded", function() {
-    // autocomplete suggestions for exercise input field
-    const exerciseListElement = document.querySelector("#exercise-list");
-    const exerciseInputElement = document.querySelector("#exercise");
 
-    // filters for requested API data
-    const parameters = "?language=2&is_main=False&ordering=name&limit=400";
-    // empty list to store transformed data
-    let exercises = [];
+// ========================================================= WIP =========================================================
+// REDESIGN TO PULL SUGGESTIONS FROM LOCAL fitnessapp.db
+    // // autocomplete suggestions for exercise input field
+    // const exerciseListElement = document.querySelector("#exercise-list");
+    // const exerciseInputElement = document.querySelector("#exercise");
 
-
-    // populate exercises list with API data
-    function fetchExercises() {
-        fetch(`https://wger.de/api/v2/exercise/${parameters}`)
-            .then((response) => response.json())
-            .then((data) => {
-                exercises = data.results.map((x) => x.name);
-
-                // commented out, so suggestions only show, when user starts typing
-                // loadData(exercises, exerciseListElement);
-            });
-    }
+    // // filters for requested API data
+    // const parameters = "?language=2&is_main=False&ordering=name&limit=400";
+    // // empty list to store transformed data
+    // let exercises = [];
 
 
-    fetchExercises();
+//     // populate exercises list with API data
+//     function fetchExercises() {
+//         fetch(`https://wger.de/api/v2/exercise/${parameters}`)
+//             .then((response) => response.json())
+//             .then((data) => {
+//                 exercises = data.results.map((x) => x.name);
+
+//                 // commented out, so suggestions only show, when user starts typing
+//                 // loadData(exercises, exerciseListElement);
+//             });
+//     }
+
+//     fetchExercises();
 
 
     // load list data into element's inner HTML

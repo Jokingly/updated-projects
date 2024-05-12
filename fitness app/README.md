@@ -4,6 +4,14 @@ Video Demo: https://youtu.be/zgJ8W3RJBmo
 
 Description: IronMetrics is a fitness app that allows users to create profiles to track their workouts and see analytics about their workout habits. It is a web app that that uses a SQLite3 database to perform create, read, update and delete (CRUD) functionalities on user data.
 
+## Login Credentials
+username: demo
+password: demo
+
+
+## Other Notes
+The upper body targets muscles such as the chest, back, shoulders, biceps, and triceps, while the lower body focuses on the quads, hamstrings, glutes, calves, and abs
+
 ## Features
 
 Below is a list with brief explanations of the app's features:
