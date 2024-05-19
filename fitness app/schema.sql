@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS user (
 	date_of_birth TEXT,
 	height_cm REAL,
 	weight_kg REAL,
-	unit_of_weight INTEGER,
-	time_system INTEGER,
-	FOREIGN KEY (unit_of_weight) REFERENCES unit_of_weight (id)
+	weight_unit INTEGER DEFAULT 1,
+	time_system INTEGER DEFAULT 1,
+	FOREIGN KEY (weight_unit) REFERENCES weight_unit (id)
 	ON UPDATE CASCADE
 	ON DELETE CASCADE,
 	FOREIGN KEY (time_system) REFERENCES time_system (id)
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS exercise_muscle_group (
 	ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS unit_of_weight (
+CREATE TABLE IF NOT EXISTS weight_unit (
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	unit text
 );

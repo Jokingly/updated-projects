@@ -475,7 +475,8 @@ def register_login():
         try:
             db.execute("""INSERT INTO user (username, password_hash, email) VALUES (?, ?, ?);""",
                         username, generate_password_hash(password), email)
-        except:
+        except Exception as e:
+            print(f"Registration error:\n{e}")
             flash("Error encountered, please try again.\nIf error persists, kindly contact support.")
             return render_template("register_login.html")
         
@@ -499,7 +500,7 @@ def register_login():
 @app.route("/register_details", methods=["GET", "POST"])
 def register_details():
 
-    print(f"PRINT USER ID: {session.get("user_id")}")
+    print(f"PRINT USER ID: {session.get('user_id')}")
 
     # post form - profile details
     if request.method == "POST":
