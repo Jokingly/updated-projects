@@ -14,6 +14,16 @@ app = Flask(__name__)
 # set secret key for session
 app.secret_key = "e9c85f9aa4288eb20f69a1dec03e1a9fb69a51a7df0fa46700a19ee17c14cda2"
 
+@app.template_filter()
+def datetime_format(value, current_format="%Y-%m-%d", format="%Y-%m-%d, %a"):
+    """
+    first, converts string date into datetime object.
+    then converts datetime object into default- or given format.
+    """
+    return datetime.strptime(value, current_format).strftime(format)
+
+
+
 # session configured on server-side, referenced from CS50
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -97,7 +107,35 @@ def createworkout():
 
     return redirect(url_for("editworkout"))
 
+# delete workout endpoint
+@app.route("/deleteworkout", methods=["POST"])
+@login_required
+def deleteworkout():
+    user_id = session.get("user_id")
 
+    if request.method == "POST":
+        if "delete-workout-id" in request.form:
+            workout_id = request.form.get("delete-workout-id")
+            db.execute("DELETE FROM workout WHERE user_id = ? AND id = ?;", user_id, workout_id)
+
+            return redirect(url_for("index"))
+
+
+# add/edit note
+@app.route("/editnote", methods=["POST"])
+@login_required
+def editnote():
+    workout_id = session.get("workout_id")
+
+    if request.method == "POST":
+        if "note" in request.form:
+            note = request.form.get("note")
+            db.execute("UPDATE workout SET note = ? WHERE id = ?", note, workout_id)
+
+            return redirect(url_for("editworkout"))
+
+
+# edit profile
 @app.route("/editprofile", methods=["GET", "POST"])
 @login_required
 def editprofile():
@@ -166,19 +204,23 @@ def editworkout():
     workout_id)
 
     # exercises logged in the workout
-    workout_exercises = {dict["name"] for dict in sets}
+    workout_exercises = list({dict["name"] for dict in sets})
 
     workout_info = db.execute("SELECT * FROM workout WHERE id = ?;", workout_id)
 
     if request.method == "POST":
         # edit date, start- and end time
         if "editworkout-date" in request.form:
-            new_date = request.form.get("editworkout-date")
-            new_start_time = request.form.get("editworkout-start-time")
-            new_end_time = request.form.get("editworkout-end-time")
+            try:
+                new_date = request.form.get("editworkout-date")
+                new_start_time = request.form.get("editworkout-start-time")
+                new_end_time = request.form.get("editworkout-end-time")
 
-            db.execute("UPDATE workout SET date = ?, start_time = ?, end_time = ? WHERE id = ?;", new_date, new_start_time, new_end_time, workout_id)
-
+                db.execute("UPDATE workout SET date = ?, start_time = ?, end_time = ? WHERE id = ?;", new_date, new_start_time, new_end_time, workout_id)
+            except Exception as e:
+                print(f"Exception editing date and time: {e}")
+                return error_message("Oops, something went wrong...", 400)
+            
         # delete exercise sets
         elif "delete-user-id" in request.form:
             try:
@@ -189,10 +231,53 @@ def editworkout():
 
                 db.execute("DELETE FROM workout_set WHERE user_id = ? AND workout_id = ? AND exercise_id = ? AND exercise_set = ?;", user_id, workout_id, exercise_id, exercise_set)
 
-            except:
+            except Exception as e:
+                print(f"Exception deleting set: {e}")
                 return error_message("Oops, something went wrong...", 400)
 
-        # log new set in workout
+        # edit set
+        elif "edit-user-id" in request.form:
+            try:
+                user_id = request.form.get("edit-user-id")
+                workout_id = request.form.get("edit-workout-id")
+                exercise_id = request.form.get("edit-exercise-id")
+                exercise_set = request.form.get("edit-exercise-set")
+                new_reps = request.form.get("edit-reps")
+                new_weight = request.form.get("edit-weight")
+
+                db.execute("""
+                            UPDATE workout_set SET reps = ?, weight_kg = ?
+                            WHERE user_id = ?
+                            AND workout_id = ?
+                            AND exercise_id = ?
+                            AND exercise_set = ?
+                           ;"""
+                           , new_reps, new_weight, user_id, workout_id, exercise_id, exercise_set)
+
+            except Exception as e:
+                print(f"Exception editing set: {e}")
+                return error_message("Oops, something went wrong...", 400)
+
+        # add set to existing exercise
+        elif "add-set" in request.form:
+            try:
+                user_id = request.form.get("add-user-id")
+                workout_id = request.form.get("add-workout-id")
+                exercise_id = request.form.get("add-exercise-id")
+                add_set = request.form.get("add-set")
+                add_reps = request.form.get("add-reps")
+                add_weight = request.form.get("add-weight")
+
+                # =================================================================================================== DEBUG PRINT ===================================================================================================
+                print(f"try DEBUG PRINT:\nrequest form: {request.form}")
+
+                db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES(?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, add_set, add_reps, add_weight)
+
+            except Exception as e:
+                print(f"Exception adding set to existing exercise: {e}")
+                return error_message("Oops, something went wrong...", 400)
+
+        # log new set
         else:
             try:
                 weight = request.form.get("weight")
@@ -200,14 +285,17 @@ def editworkout():
                 exercise_set = request.form.get("set")
                 exercise_name = request.form.get("exercise")
                 # exercise_name = request.form.get("exercise").lower()
-                query_result = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name) 
                 exercise_id = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name)[0].get("id")
 
                 # insert row into workout_set table
                 db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES (?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, exercise_set, reps, weight)
 
+                # =================================================================================================== DEBUG PRINT ===================================================================================================
+                print(f"try DEBUG PRINT:\nrequest form: {request.form}")
+
             except Exception as e:
-                print(e)
+                print(f"Exception logging new set: {e}")
+                print(f"except DEBUG PRINT:\nrequest form: {request.form}")
                 return error_message("Invalid exercise name.", 400)
 
         return redirect(url_for("editworkout"))
@@ -277,15 +365,9 @@ def index():
     except:
         dashboard["total_volume_lifted"] = 0
 
-# TODO: create separate function/url(/delete-workout) for this that redirects to homepage after completion
+    # load specific edit workout page
     if request.method == "POST":
-        if "delete-workout-id" in request.form:
-            workout_id = request.form.get("delete-workout-id")
-            db.execute("DELETE FROM workout WHERE user_id = ? AND id = ?;", user_id, workout_id)
-
-            return redirect(url_for("index"))
-
-        elif "edit-workout-id" in request.form:
+        if "edit-workout-id" in request.form:
             workout_id = request.form.get("edit-workout-id")
             session["workout_id"] = workout_id
 

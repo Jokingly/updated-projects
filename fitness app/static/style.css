@@ -3,3 +3,12 @@
     --secondary-colour:#FFFFFF;
     --tertiary-colour:#dc0000;
 }
+
+/* Potentially not needed, if .hide works as intended */
+/* #edit-datetime-fields, .edit-set-fields, #note-form, .add-set-field {
+    display: none;
+} */
+
+.hide {
+    display: none;
+}

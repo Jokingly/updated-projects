@@ -1,19 +1,72 @@
-// editworkout.html scripts
+// ---------------------------------------------------------------- editworkout.html - show/hide forms buttons ----------------------------------------------------------------
 
-// editworkout.html clicking suggestion fills input box
+// editworkout.html
+// show/hide forms with event listeners
+document.addEventListener("DOMContentLoaded", function() {
+
+    document.documentElement.addEventListener("click", (e) => {
+        const targetClassName = e.target.className;
+        // helper functions
+
+        // check string for substring. boolean output
+        function checkSubString(mainString, subString) {
+            return mainString.indexOf(subString) !== -1;
+        }
+
+
+        // visibility toggles for following edit fields:
+        // - datetime
+        // - note
+        // - add set
+        // - edit set
+        // switch statement for readability
+        switch(true) {
+            // datetime edit fields
+            case checkSubString(targetClassName, 'edit-datetime-button'):
+                document.getElementById('edit-datetime-fields').classList.toggle('hide');
+                break;
+
+            // note edit field
+            case checkSubString(targetClassName, 'edit-note-button'):
+                document.getElementById('note-form').classList.toggle('hide');
+                break;
+
+            // add set fields
+            case checkSubString(targetClassName, 'add-set-button'):
+                const targetElements = document.getElementsByClassName(e.target.value);
+
+                for (let element of targetElements) {
+                    element.classList.toggle('hide');                    
+                }
+                break;
+
+            // edit set fields
+            case checkSubString(targetClassName, 'edit-set-button'):
+                const targetElems = document.getElementsByClassName(e.target.value);
+                for(let element of targetElems) {
+                    element.classList.toggle('hide');
+                }
+                break;
+
+        }
+    });
+});
+
+
+// ---------------------------------------------------------------- editworkout.html - autofill suggestions ----------------------------------------------------------------
+// editworkout.html - populate exercise input box with autosuggestion
 // *part of autocomplete list
 // declared outside of "DOMContentLoaded" so function can be called from HTML...
 function displayName(value) {
-    exerciseInputElement = document.querySelector("#exercise");
-    exerciseListElement = document.querySelector("#exercise-list");
+    const exerciseInputElement = document.querySelector("#exercise");
+    const exerciseListElement = document.querySelector("#exercise-list");
 
     exerciseInputElement.value = value;
     exerciseListElement.innerHTML = "";
 }
 
 
-
-// editworkout.html autocomplete list
+// editworkout.html - exercise autocomplete suggestions
 document.addEventListener("DOMContentLoaded", function() {
 
 // ========================================================= WIP =========================================================
@@ -66,13 +119,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
             element.innerHTML = innerElement;
 
-            // TODO: enable users to click suggestions
+            // enable users to click suggestions
             const listElements = document.querySelectorAll("#exercise-list li");
             listElements.forEach((element) => element.setAttribute("onclick", `displayName("${element.innerHTML}")`));
             console.log(`displayName(${element.innerHTML})`);
 
         }
     }
+
 
     // filter user input (searchText)
     function filterData(data, searchText) {
