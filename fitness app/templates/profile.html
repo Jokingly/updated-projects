@@ -3,6 +3,7 @@
 {% block title %}{{ session["user_name"] }}'s Profile{% endblock %}
 
 {% block main %}
+<!-- profile info -->
 <div class="container w-25">
     <table class="table table-sm">
         <tbody>
@@ -38,9 +39,42 @@
                 <td>Weight(KG):</td>
                 <td>{{ profile_data.weight_kg }}</td>
             </tr>
+            <tr>
+                <td>Weight Unit:</td>
+                <td>
+                    {% if profile_data.weight_unit == "kg" %}
+                        <form action="/profile" method="post" id="kg_form">
+                            <input type="hidden" form="kg_form" name="kg" value="kg">
+                            <button type="submit" form="kg_form" disabled>KG</button>
+                        </form>
+                        <form action="/profile" method="post" id="lbs_form">
+                            <input type="hidden" form="lbs_form" name="lbs" value="lbs">
+                            <button type="submit" form="lbs_form">LBS</button>
+                        </form>
+                    {% else %}
+                        <form action="/profile" method="post" id="kg_form">
+                            <input type="hidden" form="kg_form" name="kg" value="kg">
+                            <button type="submit" form="kg_form">KG</button>
+                        </form>
+                        <form action="/profile" method="post" id="lbs_form">
+                            <input type="hidden" form="lbs_form" name="lbs" value="lbs">
+                            <button type="submit" form="lbs_form" disabled>LBS</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
+<!-- change measurement units -->
+<!-- (kg - lbs, 24 hour system - 12 hour system) -->
+<div>
+    <!-- kg - lbs -->
+    <form>
+
+    </form>
+</div>
+<!-- buttons -->
 <div class="container">
         <button type="button" class="btn btn-success" onclick="history.back()">Back</button>
         <a href="/editprofile" class="btn btn-success">Edit Profile</a>

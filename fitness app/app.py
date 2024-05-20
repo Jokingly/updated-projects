@@ -49,7 +49,7 @@ def changepassword():
     user_id = session.get("user_id")
 
     if request.method == "POST":
-        user_hash = db.execute("SELECT hash FROM users WHERE id = ?;", user_id)[0].get("hash")
+        user_hash = db.execute("SELECT hash FROM user WHERE id = ?;", user_id)[0].get("hash")
         old_password = request.form.get("old-password")
         new_password = request.form.get("new-password")
         confirm_password = request.form.get("confirm-password")
@@ -74,8 +74,8 @@ def changepassword():
             return render_template("changepassword.html")
 
         # upon passing above tests, create new user
-        # this is done by inserting the username and password in the users table
-        db.execute("UPDATE users SET hash = ? WHERE id = ?;", generate_password_hash(new_password), user_id)
+        # this is done by inserting the username and password in the user table
+        db.execute("UPDATE user SET hash = ? WHERE id = ?;", generate_password_hash(new_password), user_id)
 
         # if password update successful, flash message and redirect to profile page
         flash("Password update successful!")
@@ -142,18 +142,8 @@ def editprofile():
     user_id = session.get("user_id")
 
     # query user data
-    profile = db.execute("SELECT * FROM users WHERE id = ?;", user_id)[0]
+    profile = db.execute("SELECT * FROM user WHERE id = ?;", user_id)[0]
 
-    # add user data to dictionary to be passed to "editprofile.html"
-    profile_data = dict()
-    profile_data["username"] = profile.get("username")
-    profile_data["first_name"] = profile.get("first_name")
-    profile_data["last_name"] = profile.get("last_name")
-    profile_data["date_of_birth"] = profile.get("date_of_birth")
-    profile_data["height"] = profile.get("height_cm")
-    profile_data["weight"] = profile.get("weight_kg")
-
-    # NEEDS TESTING
     if request.method == "POST":
 
         # get form data
@@ -164,24 +154,24 @@ def editprofile():
         new_weight = request.form.get("edit-weight")
 
         # if input value passed is new and not empty update relevant column
-        if new_first_name != profile_data["first_name"] and new_first_name != "":
-            db.execute("UPDATE OR IGNORE users SET first_name = ? WHERE id = ?;", new_first_name, user_id)
+        if new_first_name != profile["first_name"] and new_first_name != "":
+            db.execute("UPDATE OR IGNORE user SET first_name = ? WHERE id = ?;", new_first_name, user_id)
 
-        if new_last_name != profile_data["last_name"] and new_last_name != "":
-            db.execute("UPDATE OR IGNORE users SET last_name = ? WHERE id = ?;", new_last_name, user_id)
+        if new_last_name != profile["last_name"] and new_last_name != "":
+            db.execute("UPDATE OR IGNORE user SET last_name = ? WHERE id = ?;", new_last_name, user_id)
 
-        if new_date_of_birth != profile_data["date_of_birth"] and new_date_of_birth != "":
-            db.execute("UPDATE OR IGNORE users SET date_of_birth = ? WHERE id = ?;", new_date_of_birth, user_id)
+        if new_date_of_birth != profile["date_of_birth"] and new_date_of_birth != "":
+            db.execute("UPDATE OR IGNORE user SET date_of_birth = ? WHERE id = ?;", new_date_of_birth, user_id)
 
-        if new_height != profile_data["height"] and new_height != "":
-            db.execute("UPDATE OR IGNORE users SET height_cm = ? WHERE id = ?;", new_height, user_id)
+        if new_height != profile["height"] and new_height != "":
+            db.execute("UPDATE OR IGNORE user SET height_cm = ? WHERE id = ?;", new_height, user_id)
 
-        if new_weight != profile_data["weight"] and new_weight != "":
-            db.execute("UPDATE OR IGNORE users SET weight_kg = ? WHERE id = ?;", new_weight, user_id)
+        if new_weight != profile["weight"] and new_weight != "":
+            db.execute("UPDATE OR IGNORE user SET weight_kg = ? WHERE id = ?;", new_weight, user_id)
 
         return redirect(url_for("profile"))
 
-    return render_template("editprofile.html", profile_data=profile_data)
+    return render_template("editprofile.html", profile_data=profile)
 
 
 @app.route("/editworkout", methods=["GET", "POST"])
@@ -190,7 +180,7 @@ def editworkout():
     user_id = session.get("user_id")
     workout_id = session.get("workout_id")
 
-    # select workout data via SQL
+    # get workout data from SQL db
     sets = db.execute("""
                         WITH workout_data AS (
                         SELECT *
@@ -268,9 +258,6 @@ def editworkout():
                 add_reps = request.form.get("add-reps")
                 add_weight = request.form.get("add-weight")
 
-                # =================================================================================================== DEBUG PRINT ===================================================================================================
-                print(f"try DEBUG PRINT:\nrequest form: {request.form}")
-
                 db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES(?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, add_set, add_reps, add_weight)
 
             except Exception as e:
@@ -289,9 +276,6 @@ def editworkout():
 
                 # insert row into workout_set table
                 db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES (?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, exercise_set, reps, weight)
-
-                # =================================================================================================== DEBUG PRINT ===================================================================================================
-                print(f"try DEBUG PRINT:\nrequest form: {request.form}")
 
             except Exception as e:
                 print(f"Exception logging new set: {e}")
@@ -419,19 +403,35 @@ def logout():
 @login_required
 def profile():
     user_id = session.get("user_id")
-    profile = db.execute("SELECT * FROM user WHERE id=?;", user_id)[0]
 
-    profile_data = dict()
-    profile_data["id"] = profile.get("id")
-    profile_data["username"] = profile.get("username")
-    profile_data["first_name"] = profile.get("first_name")
-    profile_data["last_name"] = profile.get("last_name")
-    profile_data["date_of_birth"] = profile.get("date_of_birth")
-    profile_data["member_since"] = profile.get("member_since")
-    profile_data["height_cm"] = profile.get("height_cm")
-    profile_data["weight_kg"] = profile.get("weight_kg")
+    # JOIN with weight_unit and time_system tables to display foreign key values
+    profile = db.execute("""
+                            SELECT u.id id, username, first_name, last_name, date_of_birth, 
+                            member_since, height_cm, weight_kg, w.unit weight_unit, t.time_system time_system 
+                            FROM user u
+                            JOIN weight_unit w ON u.weight_unit = w.id
+                            JOIN time_system t ON u.time_system = t.id
+                            WHERE u.id=?;
+                        """, user_id)[0]
 
-    return render_template("profile.html", profile_data=profile_data)
+    # post request - change weight unit
+    if request.method == "POST":
+        if "kg" in request.form:
+            weight_unit = "kg"
+            weight_unit_id = db.execute("SELECT id FROM weight_unit WHERE unit=?;", weight_unit)[0]["id"]
+            db.execute("UPDATE OR IGNORE user SET weight_unit=? WHERE id=?;", weight_unit_id, user_id)
+
+            return redirect(url_for("profile"))
+
+        if "lbs" in request.form:
+            weight_unit = "lbs"
+            weight_unit_id = db.execute("SELECT id FROM weight_unit WHERE unit=?;", weight_unit)[0]["id"]
+            
+            db.execute("UPDATE OR IGNORE user SET weight_unit=? WHERE id=?;", weight_unit_id, user_id)
+
+            return redirect(url_for("profile"))               
+
+    return render_template("profile.html", profile_data=profile)
 
 
 @app.route("/register_login", methods=["GET", "POST"])
