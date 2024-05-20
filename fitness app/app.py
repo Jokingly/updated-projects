@@ -6,7 +6,7 @@ from datetime import datetime
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
-from helpers import login_required, retrieve_user, error_message
+from helpers import login_required, retrieve_user, error_message, lbs_kg_conversion
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # configure application
@@ -21,7 +21,6 @@ def datetime_format(value, current_format="%Y-%m-%d", format="%Y-%m-%d, %a"):
     then converts datetime object into default- or given format.
     """
     return datetime.strptime(value, current_format).strftime(format)
-
 
 
 # session configured on server-side, referenced from CS50
@@ -180,6 +179,16 @@ def editworkout():
     user_id = session.get("user_id")
     workout_id = session.get("workout_id")
 
+    # profile details from SQL db
+    profile = db.execute("""
+                            SELECT u.id id, username, first_name, last_name, date_of_birth, 
+                            member_since, height_cm, weight_kg, w.unit weight_unit, t.time_system time_system 
+                            FROM user u
+                            JOIN weight_unit w ON u.weight_unit = w.id
+                            JOIN time_system t ON u.time_system = t.id
+                            WHERE u.id=?;
+                        """, user_id)[0]
+
     # get workout data from SQL db
     sets = db.execute("""
                         WITH workout_data AS (
@@ -207,11 +216,12 @@ def editworkout():
                 new_end_time = request.form.get("editworkout-end-time")
 
                 db.execute("UPDATE workout SET date = ?, start_time = ?, end_time = ? WHERE id = ?;", new_date, new_start_time, new_end_time, workout_id)
+            
             except Exception as e:
                 print(f"Exception editing date and time: {e}")
                 return error_message("Oops, something went wrong...", 400)
             
-        # delete exercise sets
+        # delete set
         elif "delete-user-id" in request.form:
             try:
                 user_id = request.form.get("delete-user-id")
@@ -234,6 +244,9 @@ def editworkout():
                 exercise_set = request.form.get("edit-exercise-set")
                 new_reps = request.form.get("edit-reps")
                 new_weight = request.form.get("edit-weight")
+
+                if profile.get("weight_unit") == 'lbs':
+                    new_weight = lbs_kg_conversion(float(new_weight))
 
                 db.execute("""
                             UPDATE workout_set SET reps = ?, weight_kg = ?
@@ -258,6 +271,9 @@ def editworkout():
                 add_reps = request.form.get("add-reps")
                 add_weight = request.form.get("add-weight")
 
+                if profile.get("weight_unit") == 'lbs':
+                    add_weight = lbs_kg_conversion(float(add_weight))
+
                 db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES(?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, add_set, add_reps, add_weight)
 
             except Exception as e:
@@ -271,20 +287,21 @@ def editworkout():
                 reps = request.form.get("reps")
                 exercise_set = request.form.get("set")
                 exercise_name = request.form.get("exercise")
-                # exercise_name = request.form.get("exercise").lower()
                 exercise_id = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name)[0].get("id")
+
+                if profile.get("weight_unit") == 'lbs':
+                    weight = lbs_kg_conversion(float(weight))
 
                 # insert row into workout_set table
                 db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES (?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, exercise_set, reps, weight)
 
             except Exception as e:
                 print(f"Exception logging new set: {e}")
-                print(f"except DEBUG PRINT:\nrequest form: {request.form}")
                 return error_message("Invalid exercise name.", 400)
 
         return redirect(url_for("editworkout"))
 
-    return render_template("editworkout.html", sets=sets, workout_exercises=workout_exercises, workout_info=workout_info)
+    return render_template("editworkout.html", sets=sets, workout_exercises=workout_exercises, workout_info=workout_info, profile_data=profile)
 
 
 @app.route("/", methods=["GET", "POST"])

@@ -41,6 +41,8 @@ def retrieve_user(database, username):
         except:
             return None
 
-
-
+# convert lbs to kg
+def lbs_kg_conversion(number, decimal_places=0):
+    lbs_kg_divider = 0.4535924
+    return round(number * lbs_kg_divider, decimal_places)
 

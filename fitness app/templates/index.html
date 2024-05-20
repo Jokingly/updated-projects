@@ -83,7 +83,7 @@
                     <td>
                         <form action="/" method="post" style="display: inline;" id="edit-workout{{ workout.id }}">
                             <input type="hidden" name="edit-workout-id" form="edit-workout{{ workout.id }}" value="{{ workout.id }}">
-                            <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-success">Edit</button>
+                            <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-success">View</button>
                         </form>
                         <form action="/deleteworkout" method="post" id="delete-workout{{ workout.id }}" onsubmit="return confirm('Irreversibly delete workout?')" style="display: inline;">
                             <input type="hidden" name="delete-workout-id" form="delete-workout{{ workout.id }}" value="{{ workout.id }}">

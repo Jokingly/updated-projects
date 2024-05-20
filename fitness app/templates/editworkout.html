@@ -3,6 +3,14 @@
 {% block title %}Edit Workout{% endblock %}
 
 {% block main %}
+
+<!-- weight conversion and default weight description variables -->
+<!-- kg to lbs multiplier  -->
+{% set weight_multiplier = 2.2046226 %}
+<!-- default weight unit is kg -->
+{% set default_weight = 'kg' %}
+
+
 <div class="container" id="workoutinfo">
     <!-- top row wrapper - workout info & delete workout button -->
     <div>
@@ -100,7 +108,12 @@
             </div>
             <!-- weight (kg) -->
             <div class="col">
-                <label for="weight" class="form-label">Weight (KG)</label>
+                <!-- dynamic weight label -->
+                {% if profile_data.weight_unit == default_weight %}
+                    <label for="weight" class="form-label">Weight (KG)</label>
+                {% else %}
+                    <label for="weight" class="form-label">Weight (LBS)</label>
+                {% endif %}
                 <input type="number" class="form-control text-center" name="weight" id="weight" form="add-set">
             </div>
             <!-- add button -->
@@ -113,8 +126,12 @@
         </div>
     </form>
 
+
     <!-- exercise list -->
     <table class="table" id="current-workout-table">
+
+
+        
         <!-- for loop to insert workout data -->
         <th></th>
         <tbody>
@@ -133,13 +150,20 @@
                     </th>
                 </tr>
 
+                
+
                 <!-- add next set form -->
                 <!-- uses last_set variable defined at the start of loop -->
                 <form action="/editworkout" method="post" id="add-set-{{ last_set.exercise_id }}" class="add-set-{{ last_set.exercise_id }}" autocomplete="off">
                     <tr class="display-add-set-{{ last_set.exercise_id }} hide">
                         <td>Set</td>
                         <td>Reps</td>
-                        <td>Weight (KG)</td>
+                        <!-- dynamic weight description -->
+                        {% if profile_data.weight_unit == default_weight %}
+                            <td>Weight (KG)</td>
+                        {% else %}
+                            <td>Weight (LBS)</td>
+                        {% endif %}
                     </tr>
                     <tr class="display-add-set-{{ last_set.exercise_id }} hide">
                         <!-- exercise -->
@@ -175,17 +199,28 @@
                     </tr>
                 </form>
 
+                <!-- exercise table column headings -->
                 <tr>
                     <td>Set</td>
                     <td>Reps</td>
-                    <td>Weight (KG)</td>
+                    {% if profile_data.weight_unit == default_weight %}
+                        <td>Weight (KG)</td>
+                    {% else %}
+                        <td>Weight (LBS)</td>
+                    {% endif %}
                 </tr>
+
                 {% for set in sets %}
                     {% if exercise == set.name %}
                         <tr class="display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }}">
                             <td>{{ set.exercise_set }}</td>
                             <td>{{ set.reps }}</td>
-                            <td>{{ set.weight_kg }}</td>
+                            <!-- dynamic weight conversion -->
+                            {% if profile_data.weight_unit == default_weight %}
+                                <td>{{ set.weight_kg }}</td>
+                            {% else %}
+                                <td>{{ set.weight_kg * weight_multiplier | round(2) }}</td>
+                            {% endif %}
                             <!-- delelte- and edit set buttons -->
                             <td>
                                 <!-- edit set button (script to show/hide form) -->
