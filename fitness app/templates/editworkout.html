@@ -130,8 +130,6 @@
     <!-- exercise list -->
     <table class="table" id="current-workout-table">
 
-
-        
         <!-- for loop to insert workout data -->
         <th></th>
         <tbody>
@@ -149,8 +147,6 @@
                         </button>
                     </th>
                 </tr>
-
-                
 
                 <!-- add next set form -->
                 <!-- uses last_set variable defined at the start of loop -->
@@ -221,7 +217,7 @@
                             {% else %}
                                 <td>{{ set.weight_kg * weight_multiplier | round(2) }}</td>
                             {% endif %}
-                            <!-- delelte- and edit set buttons -->
+                            <!-- delete- and edit set buttons -->
                             <td>
                                 <!-- edit set button (script to show/hide form) -->
                                 <button class="btn btn-success edit-set-button" value="display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }}">
