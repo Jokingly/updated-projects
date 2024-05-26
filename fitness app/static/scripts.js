@@ -67,89 +67,82 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // ========================================================= WIP =========================================================
 // REDESIGN TO PULL SUGGESTIONS FROM LOCAL fitnessapp.db
-    // // autocomplete suggestions for exercise input field
-    // const exerciseListElement = document.querySelector("#exercise-list");
-    // const exerciseInputElement = document.querySelector("#exercise");
+    // autocomplete suggestions for exercise input field
+    const exerciseListElement = document.querySelector("#exercise-list");
+    const exerciseInputElement = document.querySelector("#exercise");
 
-    // // filters for requested API data
+    // filters for requested API data
+    const parameters = "pull";
     // const parameters = "?language=2&is_main=False&ordering=name&limit=400";
-    // // empty list to store transformed data
-    // let exercises = [];
+    // empty list to store transformed data
+    let exercises = [];
 
 
-//     // populate exercises list with API data
-//     function fetchExercises() {
-//         fetch(`https://wger.de/api/v2/exercise/${parameters}`)
-//             .then((response) => response.json())
-//             .then((data) => {
-//                 exercises = data.results.map((x) => x.name);
+    // populate exercises list with API data
+    function fetchExercises() {
 
-//                 // commented out, so suggestions only show, when user starts typing
-//                 // loadData(exercises, exerciseListElement);
-//             });
-//     }
+        // fetch(`http://127.0.0.1:5000/exercise/${parameters}`)
+        fetch(`http://127.0.0.1:5000/exercise`)
+            .then((response) => response.json())
+            .then((data) => {
+                // return array of exercise names
+                exercises = data.map((object) => object.name);
+            });
+    }
 
-//     fetchExercises();
-
-
-//     // load list data into element's inner HTML
-//     function loadData(data, element) {
-//         if (data) {
-//             // clearing element allows for loading up-to-date data without appending
-//             element.innerHTML = "";
-//             let innerElement = "";
-
-//             // add first 5 data items to innerElement
-//             for (let i = 0; i < 5; i++) {
-//                 // do not show "undefined"
-//                 if (data[i] === undefined) {
-//                     continue;
-//                 }
-//                 innerElement += `<li>${data[i]}</li>`;
-//             }
-
-//             // // add all data items to innerElement
-//             // data.forEach((item) => {
-//             //     innerElement += `<li>${item}</li>`;
-//             // });
-
-//             element.innerHTML = innerElement;
-
-//             // enable users to click suggestions
-//             const listElements = document.querySelectorAll("#exercise-list li");
-//             listElements.forEach((element) => element.setAttribute("onclick", `displayName("${element.innerHTML}")`));
-//             console.log(`displayName(${element.innerHTML})`);
-
-//         }
-//     }
+    fetchExercises();
 
 
-//     // filter user input (searchText)
-//     function filterData(data, searchText) {
-//         return data.filter((x) => x.toLowerCase().includes(searchText.toLowerCase()));
-//     }
+    // load list data into element's inner HTML
+    function loadData(data, element) {
+        if (data) {
+            // clearing element to load up-to-date data
+            element.innerHTML = "";
+            let innerElement = "";
+
+            // add first 5 items to innerElement
+            for (let i = 0; i < 5; i++) {
+                // do not show "undefined"
+                if (data[i] === undefined) {
+                    continue;
+                }
+                innerElement += `<li>${data[i]}</li>`;
+            }
+
+            element.innerHTML = innerElement;
+
+            // enable users to click suggestions
+            const listElements = document.querySelectorAll("#exercise-list li");
+            listElements.forEach((element) => element.setAttribute("onclick", `displayName("${element.innerHTML}")`));
+        }
+    }
 
 
-//     // EventListener
-//     exerciseInputElement.addEventListener("input", function() {
-//         // clears autocomplete suggestions at every function call, cleaning previous output
-//         removeElements(exerciseListElement);
+    // filter user input (searchText)
+    function filterData(data, searchText) {
+        return data.filter((x) => x.toLowerCase().includes(searchText.toLowerCase()));
+    }
 
-//         // show autocomplete suggestions, when input box is not empty
-//         if (exerciseInputElement.value != "") {
-//             // store list of filtered data in variable
-//             const filteredData = filterData(exercises, exerciseInputElement.value);
-//             // pass filtered data back into loadData to update "autocomplete suggestions"
-//             loadData(filteredData, exerciseListElement);
-//         }
 
-//     });
-    
+    // EventListener
+    exerciseInputElement.addEventListener("input", function() {
+        // clears suggestions at every function call
+        removeElements(exerciseListElement);
 
-//     // clear list of autocomplete suggestions
-//     function removeElements(element) {
-//         element.innerHTML = "";
-//     }
+        // show autocomplete suggestions, when input box is not empty
+        if (exerciseInputElement.value != "") {
+            // store list of filtered data in variable
+            const filteredData = filterData(exercises, exerciseInputElement.value);
+            // pass filtered data back into loadData to update "autocomplete suggestions"
+            loadData(filteredData, exerciseListElement);
+        }
+    });
+
+
+    // clear list of autocomplete suggestions
+    function removeElements(element) {
+        element.innerHTML = "";
+    }
 });
 
 

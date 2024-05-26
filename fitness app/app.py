@@ -4,7 +4,7 @@ from datetime import datetime
 
 # Keeping cs50 SQL, to save from rewriting all SQL queries (query syntax, outputs(dictonaries to list of tuples))
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify
 from flask_session import Session
 from helpers import login_required, retrieve_user, error_message, lbs_kg_conversion
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -45,13 +45,13 @@ def after_request(response):
 @app.route("/changepassword", methods=["GET", "POST"])
 @login_required
 def changepassword():
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
 
     if request.method == "POST":
-        user_hash = db.execute("SELECT hash FROM user WHERE id = ?;", user_id)[0].get("hash")
-        old_password = request.form.get("old-password")
-        new_password = request.form.get("new-password")
-        confirm_password = request.form.get("confirm-password")
+        user_hash = db.execute("SELECT hash FROM user WHERE id = ?;", user_id)[0].get("hash", None)
+        old_password = request.form.get("old-password", None)
+        new_password = request.form.get("new-password", None)
+        confirm_password = request.form.get("confirm-password", None)
 
         # if old_password doesn't match hash, return error
         if not check_password_hash(user_hash, old_password):
@@ -91,7 +91,7 @@ def createworkout():
 
     # initialising variables
     # user id
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
     # today's date
     date = datetime.now().strftime('%Y-%m-%d')
     # current time
@@ -101,7 +101,7 @@ def createworkout():
     db.execute("INSERT OR IGNORE INTO workout (user_id, date, start_time) VALUES (?, ?, ?);", user_id, date, start_time)
 
     # set session["workout_id"] to newly-created workout
-    workout_id = db.execute("SELECT id FROM workout WHERE user_id = ? AND date = ? AND start_time = ?;", user_id, date, start_time)[0].get("id")
+    workout_id = db.execute("SELECT id FROM workout WHERE user_id = ? AND date = ? AND start_time = ?;", user_id, date, start_time)[0].get("id", None)
     session["workout_id"] = workout_id
 
     return redirect(url_for("editworkout"))
@@ -110,11 +110,11 @@ def createworkout():
 @app.route("/deleteworkout", methods=["POST"])
 @login_required
 def deleteworkout():
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
 
     if request.method == "POST":
         if "delete-workout-id" in request.form:
-            workout_id = request.form.get("delete-workout-id")
+            workout_id = request.form.get("delete-workout-id", None)
             db.execute("DELETE FROM workout WHERE user_id = ? AND id = ?;", user_id, workout_id)
 
             return redirect(url_for("index"))
@@ -124,11 +124,11 @@ def deleteworkout():
 @app.route("/editnote", methods=["POST"])
 @login_required
 def editnote():
-    workout_id = session.get("workout_id")
+    workout_id = session.get("workout_id", None)
 
     if request.method == "POST":
         if "note" in request.form:
-            note = request.form.get("note")
+            note = request.form.get("note", None)
             db.execute("UPDATE workout SET note = ? WHERE id = ?", note, workout_id)
 
             return redirect(url_for("editworkout"))
@@ -138,7 +138,7 @@ def editnote():
 @app.route("/editprofile", methods=["GET", "POST"])
 @login_required
 def editprofile():
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
 
     # query user data
     profile = db.execute("SELECT * FROM user WHERE id = ?;", user_id)[0]
@@ -146,11 +146,11 @@ def editprofile():
     if request.method == "POST":
 
         # get form data
-        new_first_name = request.form.get("edit-first-name")
-        new_last_name = request.form.get("edit-last-name")
-        new_date_of_birth = request.form.get("edit-date-of-birth")
-        new_height = request.form.get("edit-height")
-        new_weight = request.form.get("edit-weight")
+        new_first_name = request.form.get("edit-first-name", None)
+        new_last_name = request.form.get("edit-last-name", None)
+        new_date_of_birth = request.form.get("edit-date-of-birth", None)
+        new_height = request.form.get("edit-height", None)
+        new_weight = request.form.get("edit-weight", None)
 
         # if input value passed is new and not empty update relevant column
         if new_first_name != profile["first_name"] and new_first_name != "":
@@ -176,8 +176,8 @@ def editprofile():
 @app.route("/editworkout", methods=["GET", "POST"])
 @login_required
 def editworkout():
-    user_id = session.get("user_id")
-    workout_id = session.get("workout_id")
+    user_id = session.get("user_id", None)
+    workout_id = session.get("workout_id", None)
 
     # profile details from SQL db
     profile = db.execute("""
@@ -211,9 +211,9 @@ def editworkout():
         # edit date, start- and end time
         if "editworkout-date" in request.form:
             try:
-                new_date = request.form.get("editworkout-date")
-                new_start_time = request.form.get("editworkout-start-time")
-                new_end_time = request.form.get("editworkout-end-time")
+                new_date = request.form.get("editworkout-date", None)
+                new_start_time = request.form.get("editworkout-start-time", None)
+                new_end_time = request.form.get("editworkout-end-time", None)
 
                 db.execute("UPDATE workout SET date = ?, start_time = ?, end_time = ? WHERE id = ?;", new_date, new_start_time, new_end_time, workout_id)
             
@@ -224,10 +224,10 @@ def editworkout():
         # delete set
         elif "delete-user-id" in request.form:
             try:
-                user_id = request.form.get("delete-user-id")
-                workout_id = request.form.get("delete-workout-id")
-                exercise_id = request.form.get("delete-exercise-id")
-                exercise_set = request.form.get("delete-exercise-set")
+                user_id = request.form.get("delete-user-id", None)
+                workout_id = request.form.get("delete-workout-id", None)
+                exercise_id = request.form.get("delete-exercise-id", None)
+                exercise_set = request.form.get("delete-exercise-set", None)
 
                 db.execute("DELETE FROM workout_set WHERE user_id = ? AND workout_id = ? AND exercise_id = ? AND exercise_set = ?;", user_id, workout_id, exercise_id, exercise_set)
 
@@ -238,14 +238,14 @@ def editworkout():
         # edit set
         elif "edit-user-id" in request.form:
             try:
-                user_id = request.form.get("edit-user-id")
-                workout_id = request.form.get("edit-workout-id")
-                exercise_id = request.form.get("edit-exercise-id")
-                exercise_set = request.form.get("edit-exercise-set")
-                new_reps = request.form.get("edit-reps")
-                new_weight = request.form.get("edit-weight")
+                user_id = request.form.get("edit-user-id", None)
+                workout_id = request.form.get("edit-workout-id", None)
+                exercise_id = request.form.get("edit-exercise-id", None)
+                exercise_set = request.form.get("edit-exercise-set", None)
+                new_reps = request.form.get("edit-reps", None)
+                new_weight = request.form.get("edit-weight", None)
 
-                if profile.get("weight_unit") == 'lbs':
+                if profile.get("weight_unit", None) == 'lbs':
                     new_weight = lbs_kg_conversion(float(new_weight))
 
                 db.execute("""
@@ -264,14 +264,14 @@ def editworkout():
         # add set to existing exercise
         elif "add-set" in request.form:
             try:
-                user_id = request.form.get("add-user-id")
-                workout_id = request.form.get("add-workout-id")
-                exercise_id = request.form.get("add-exercise-id")
-                add_set = request.form.get("add-set")
-                add_reps = request.form.get("add-reps")
-                add_weight = request.form.get("add-weight")
+                user_id = request.form.get("add-user-id", None)
+                workout_id = request.form.get("add-workout-id", None)
+                exercise_id = request.form.get("add-exercise-id", None)
+                add_set = request.form.get("add-set", None)
+                add_reps = request.form.get("add-reps", None)
+                add_weight = request.form.get("add-weight", None)
 
-                if profile.get("weight_unit") == 'lbs':
+                if profile.get("weight_unit", None) == 'lbs':
                     add_weight = lbs_kg_conversion(float(add_weight))
 
                 db.execute("INSERT OR IGNORE INTO workout_set (user_id, workout_id, exercise_id, exercise_set, reps, weight_kg) VALUES(?, ?, ?, ?, ?, ?);", user_id, workout_id, exercise_id, add_set, add_reps, add_weight)
@@ -283,13 +283,13 @@ def editworkout():
         # log new set
         else:
             try:
-                weight = request.form.get("weight")
-                reps = request.form.get("reps")
-                exercise_set = request.form.get("set")
-                exercise_name = request.form.get("exercise")
-                exercise_id = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name)[0].get("id")
+                weight = request.form.get("weight", None)
+                reps = request.form.get("reps", None)
+                exercise_set = request.form.get("set", None)
+                exercise_name = request.form.get("exercise", None)
+                exercise_id = db.execute("SELECT id FROM exercise WHERE name = ?;", exercise_name)[0].get("id", None)
 
-                if profile.get("weight_unit") == 'lbs':
+                if profile.get("weight_unit", None) == 'lbs':
                     weight = lbs_kg_conversion(float(weight))
 
                 # insert row into workout_set table
@@ -307,7 +307,7 @@ def editworkout():
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
     workout_history = db.execute("SELECT * FROM workout WHERE user_id = ? ORDER BY date DESC, start_time DESC LIMIT 5;", user_id)
 
     avg_workout_duration_min = db.execute("""
@@ -369,7 +369,7 @@ def index():
     # load specific edit workout page
     if request.method == "POST":
         if "edit-workout-id" in request.form:
-            workout_id = request.form.get("edit-workout-id")
+            workout_id = request.form.get("edit-workout-id", None)
             session["workout_id"] = workout_id
 
             return redirect(url_for("editworkout"))
@@ -385,7 +385,7 @@ def login():
         session.clear()
 
         # user details, retrieved from database
-        request_username = request.form.get("username")
+        request_username = request.form.get("username", None)
         user = retrieve_user(db, request_username)
 
         # check user info exists
@@ -394,12 +394,12 @@ def login():
 
         # compare user password with received password via check_password_hash(hashed_password, plain_text_password).
         # if password incorrect, return error message
-        if not check_password_hash(user.get("password_hash"), request.form.get("password")):
+        if not check_password_hash(user.get("password_hash", None), request.form.get("password", None)):
             return error_message("Invalid user name or password.", 403)
 
         # if username and password pass, save user id and username to session
-        session["user_id"] = user.get("id")
-        session["user_name"] = user.get("username")
+        session["user_id"] = user.get("id", None)
+        session["user_name"] = user.get("username", None)
 
         # redirect to homepage after successful login
         return redirect(url_for("index"))
@@ -419,7 +419,7 @@ def logout():
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
 
     # JOIN with weight_unit and time_system tables to display foreign key values
     profile = db.execute("""
@@ -456,10 +456,10 @@ def register_login():
 
     # post form - login details and email
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        password_confirmation = request.form.get("password_confirmation")
-        email = request.form.get("email")
+        username = request.form.get("username", None)
+        password = request.form.get("password", None)
+        password_confirmation = request.form.get("password_confirmation", None)
+        email = request.form.get("email", None)
  
         # check, if password matches password_confirmation
         if password != password_confirmation:
@@ -506,8 +506,8 @@ def register_login():
             return error_message("Invalid user name or password.", 403)
 
         # save user id and user name to session
-        session["user_id"] = user.get("id")
-        session["user_name"] = user.get("username")
+        session["user_id"] = user.get("id", None)
+        session["user_name"] = user.get("username", None)
 
         # redirect to register details page.
         return redirect(url_for("register_details"))
@@ -517,16 +517,16 @@ def register_login():
 @app.route("/register_details", methods=["GET", "POST"])
 def register_details():
 
-    print(f"PRINT USER ID: {session.get('user_id')}")
+    print(f"PRINT USER ID: {session.get('user_id', None)}")
 
     # post form - profile details
     if request.method == "POST":
-        user_id = session.get("user_id")
-        first_name = request.form.get("firstname")
-        last_name = request.form.get("lastname")
-        date_of_birth = request.form.get("date-of-birth")
-        height = request.form.get("height")
-        weight = request.form.get("weight")
+        user_id = session.get("user_id", None)
+        first_name = request.form.get("firstname", None)
+        last_name = request.form.get("lastname", None)
+        date_of_birth = request.form.get("date-of-birth", None)
+        height = request.form.get("height", None)
+        weight = request.form.get("weight", None)
 
         # update user record
         db.execute("""
@@ -550,24 +550,24 @@ def register_details():
 @app.route("/workouthistory", methods=["GET", "POST"])
 @login_required
 def workouthistory():
-    user_id = session.get("user_id")
+    user_id = session.get("user_id", None)
 
     # pagination - workout history, showing 10 workouts per page
-    workouts_sum = db.execute("SELECT COUNT() sum FROM workout WHERE user_id = ?;", user_id)[0].get("sum")
+    workouts_sum = db.execute("SELECT COUNT() sum FROM workout WHERE user_id = ?;", user_id)[0].get("sum", None)
     workouts_per_page = 10
     number_of_pages = math.ceil(workouts_sum / workouts_per_page)
     pages = list(range(1, number_of_pages + 1))
 
     # if "workout_history_page" cookie is undefined, then set it to page 1
-    if session.get("workout_history_page") == None:
+    if session.get("workout_history_page", None) == None:
         session["workout_history_page"] = 1
 
-    current_page = session.get("workout_history_page")
+    current_page = session.get("workout_history_page", None)
     row_num_start = (current_page - 1) * workouts_per_page
     row_num_end = current_page * workouts_per_page
 
     # if session["workout_history_date_order_switch"] is None, set it to "DESC" order by default:
-    if session.get("workout_history_date_order_switch") == None:
+    if session.get("workout_history_date_order_switch", None) == None:
         session["workout_history_date_order_switch"] = "DESC"
 
     if session["workout_history_date_order_switch"] == "DESC":
@@ -603,33 +603,33 @@ def workouthistory():
 
     if request.method == "POST":
         if "delete-workout-id" in request.form:
-            workout_id = request.form.get("delete-workout-id")
+            workout_id = request.form.get("delete-workout-id", None)
             db.execute("DELETE FROM workout WHERE user_id=? AND id=?", user_id, workout_id)
 
             return redirect(url_for("workouthistory"))
 
         if "edit-workout-id" in request.form:
-            workout_id = request.form.get("edit-workout-id")
+            workout_id = request.form.get("edit-workout-id", None)
             session["workout_id"] = workout_id
 
             return redirect(url_for("editworkout"))
 
         if "prev-page" in request.form:
-            prev_page = session.get("workout_history_page") + int(request.form.get("prev-page"))
+            prev_page = session.get("workout_history_page", None) + int(request.form.get("prev-page", None))
             if prev_page >= 1:
                 session["workout_history_page"] = prev_page
 
                 return redirect(url_for("workouthistory"))
 
         if "next-page" in request.form:
-            next_page = session.get("workout_history_page") + int(request.form.get("next-page"))
+            next_page = session.get("workout_history_page", None) + int(request.form.get("next-page", None))
             if next_page <= number_of_pages:
                 session["workout_history_page"] = next_page
 
                 return redirect(url_for("workouthistory"))
 
         if "change-page" in request.form:
-            page = int(request.form.get("change-page"))
+            page = int(request.form.get("change-page", None))
             if page in pages:
                 session["workout_history_page"] = page
 
@@ -647,5 +647,17 @@ def workouthistory():
 
     return render_template("workouthistory.html", workout_history=workout_history, pages=pages)
 
+# ===================================================== REST API ===================================================== 
+# methods defaults to "GET"
+@app.route("/exercise")
+@login_required
+def search_exercise():
 
-
+    # query db for exercises containing name
+    output = db.execute("""SELECT name FROM exercise LIMIT 300;""")
+    
+    # return json array of objects 
+    # python dictionaries are json-serialized by default
+    return output
+    
+    
