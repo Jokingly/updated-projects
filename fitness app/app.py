@@ -380,31 +380,7 @@ def index():
 
             return redirect(url_for("editworkout"))
 
-    # ============================= WIP - PLOTLY GRAPH =============================
-
-    data_sets = db.execute("""
-                           WITH set_data AS (
-                                        SELECT w.date date, e.name exercise, MAX(ws.weight_kg) weight_kg
-                                        FROM workout_set ws      
-                                        JOIN exercise e ON ws.exercise_id = e.id
-                                        JOIN workout w ON ws.workout_id = w.id
-                                        WHERE ws.user_id = ?
-                                        GROUP BY date, exercise 
-                           )     
-                           
-                           SELECT * FROM set_data;
-                            """, user_id)
-
-    df_sets = pd.DataFrame(data_sets)
-
-    fig_sets = px.line(df_sets, x='date', y='weight_kg', color='exercise', markers='true')
-    
-    plotly_jinja_data = {"fig_sets": fig_sets.to_html(full_html=False)}
-
-    # pass dictionary into render_template, with dictionary with dashboard data as key value pairs?
-    # return render_template("index.html", workout_history=workout_history, dashboard=dashboard)
-
-    return render_template("index.html", workout_history=workout_history, dashboard=dashboard, plotly_jinja_data=plotly_jinja_data)
+    return render_template("index.html", workout_history=workout_history, dashboard=dashboard)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -574,6 +550,36 @@ def register_details():
         return redirect(url_for("index"))
 
     return render_template("register_details.html")
+
+@app.route("/workoutanalytics", methods=["GET", "POST"])
+@login_required
+def workoutanalytics():
+    # ============================= WIP - PLOTLY GRAPH =============================
+
+    user_id = session.get("user_id", None)
+
+    data_sets = db.execute("""
+                           WITH set_data AS (
+                                        SELECT w.date date, e.name exercise, MAX(ws.weight_kg) weight_kg
+                                        FROM workout_set ws      
+                                        JOIN exercise e ON ws.exercise_id = e.id
+                                        JOIN workout w ON ws.workout_id = w.id
+                                        WHERE ws.user_id = ?
+                                        GROUP BY date, exercise 
+                           )     
+                           
+                           SELECT * FROM set_data;
+                            """, user_id)
+
+    df_sets = pd.DataFrame(data_sets)
+
+    fig_sets = px.line(df_sets, x='date', y='weight_kg', color='exercise', markers='true')
+    
+    plotly_jinja_data = {"fig_sets": fig_sets.to_html(full_html=False)}
+
+    # pass dictionary into render_template, with dictionary with dashboard data as key value pairs?
+    return render_template("workout_analytics.html", plotly_jinja_data=plotly_jinja_data)
+
 
 
 @app.route("/workouthistory", methods=["GET", "POST"])

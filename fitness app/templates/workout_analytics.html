@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock%}
+
+{% block main %}
+
+<!-- plotly test -->
+<div class="plotly-test">
+    {{ plotly_jinja_data.fig | safe }}
+</div>
+
+{% endblock %}
