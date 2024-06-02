@@ -1,19 +1,25 @@
 import math
+import pandas as pd
+import plotly.express as px
 import string
 from datetime import datetime
 
 # Keeping cs50 SQL, to save from rewriting all SQL queries (query syntax, outputs(dictonaries to list of tuples))
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from helpers import login_required, retrieve_user, error_message, lbs_kg_conversion
 from werkzeug.security import check_password_hash, generate_password_hash
 
 # configure application
 app = Flask(__name__)
+
 # set secret key for session
 app.secret_key = "e9c85f9aa4288eb20f69a1dec03e1a9fb69a51a7df0fa46700a19ee17c14cda2"
 
+
+# Jinja2 function to format datetime
+# used in editworkout.html among other places
 @app.template_filter()
 def datetime_format(value, current_format="%Y-%m-%d", format="%Y-%m-%d, %a"):
     """
@@ -374,8 +380,31 @@ def index():
 
             return redirect(url_for("editworkout"))
 
+    # ============================= WIP - PLOTLY GRAPH =============================
+
+    data_sets = db.execute("""
+                           WITH set_data AS (
+                                        SELECT w.date date, e.name exercise, MAX(ws.weight_kg) weight_kg
+                                        FROM workout_set ws      
+                                        JOIN exercise e ON ws.exercise_id = e.id
+                                        JOIN workout w ON ws.workout_id = w.id
+                                        WHERE ws.user_id = ?
+                                        GROUP BY date, exercise 
+                           )     
+                           
+                           SELECT * FROM set_data;
+                            """, user_id)
+
+    df_sets = pd.DataFrame(data_sets)
+
+    fig_sets = px.line(df_sets, x='date', y='weight_kg', color='exercise', markers='true')
+    
+    plotly_jinja_data = {"fig_sets": fig_sets.to_html(full_html=False)}
+
     # pass dictionary into render_template, with dictionary with dashboard data as key value pairs?
-    return render_template("index.html", workout_history=workout_history, dashboard=dashboard)
+    # return render_template("index.html", workout_history=workout_history, dashboard=dashboard)
+
+    return render_template("index.html", workout_history=workout_history, dashboard=dashboard, plotly_jinja_data=plotly_jinja_data)
 
 
 @app.route("/login", methods=["GET", "POST"])
