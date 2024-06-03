@@ -4,6 +4,8 @@ import plotly.express as px
 from cs50 import SQL
 
 db = SQL("sqlite:///fitnessapp.db")
+user_id = 1
+
 
 # WIP - WEIGHT PROGRESSION LINE CHART
 # ADD DROPDOWN FOR INTERACTIVE DATA ANALYSIS WITH FigureWidget
