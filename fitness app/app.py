@@ -1,6 +1,7 @@
 import math
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import string
 from datetime import datetime
 
@@ -558,6 +559,14 @@ def workoutanalytics():
 
     user_id = session.get("user_id", None)
 
+    # TODO: total sets performed per muscle group
+
+    # TODO: top 10 exercises by sets performed
+
+    # TODO: top 10 heaviest weight lifted by exercise, include muscle group in layout
+
+
+    # max weight lifted per exercise per workout
     data_sets = db.execute("""
                            WITH set_data AS (
                                         SELECT w.date date, e.name exercise, MAX(ws.weight_kg) weight_kg
@@ -573,9 +582,21 @@ def workoutanalytics():
 
     df_sets = pd.DataFrame(data_sets)
 
+    # user plotly graph objects, instead of plotly express
     fig_sets = px.line(df_sets, x='date', y='weight_kg', color='exercise', markers='true')
     
-    plotly_jinja_data = {"fig_sets": fig_sets.to_html(full_html=False)}
+    fig_sets1 = go.Figure()
+
+    fig_sets1.add_trace(
+        go.Scatter(
+            x=list(df_sets.date),
+            y=list(df_sets.weight_kg),
+            name="Weight Progression by Set",
+            line=dict(color="RebeccaPurple")
+        )
+    )
+
+    plotly_jinja_data = {"fig_sets": fig_sets.to_html(full_html=False), "fig_sets1": fig_sets1.to_html(full_html=False)}
 
     # pass dictionary into render_template, with dictionary with dashboard data as key value pairs?
     return render_template("workout_analytics.html", plotly_jinja_data=plotly_jinja_data)

@@ -79,6 +79,9 @@ CREATE TABLE IF NOT EXISTS exercise (
 	ON DELETE CASCADE
 );
 
+-- intermediate/junction/associative table to facilitate 
+-- many-to-many relationship beteween exercise- and muscle_group tables
+-- e.g.: one exercise can relate to many muscle groups and vice versa 
 CREATE TABLE IF NOT EXISTS exercise_muscle_group (
 	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	exercise_id INTEGER,

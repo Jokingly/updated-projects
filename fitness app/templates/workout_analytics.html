@@ -6,7 +6,9 @@
 
 <!-- plotly test -->
 <div class="plotly-test">
-    {{ plotly_jinja_data.fig | safe }}
+    {{ plotly_jinja_data.fig_sets | safe }}
 </div>
-
+<div class="plotly-test">
+    {{ plotly_jinja_data.fig_sets1 | safe }}
+</div>
 {% endblock %}
