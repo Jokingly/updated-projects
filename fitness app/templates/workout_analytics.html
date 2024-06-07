@@ -5,10 +5,16 @@
 {% block main %}
 
 <!-- plotly test -->
-<div class="plotly-test">
-    {{ plotly_jinja_data.fig_sets | safe }}
+<div class="test-line-graph">
+    {{ plotly_jinja_data.fig_weight_progression | safe }}
 </div>
-<div class="plotly-test">
-    {{ plotly_jinja_data.fig_sets1 | safe }}
+<div class="test-pie-chart">
+    {{ plotly_jinja_data.fig_muscle_group_pie | safe }}
+</div>
+<div class="test-horizontal-bar-chart-1">
+    {{ plotly_jinja_data.hbar_chart_exercises_by_sets | safe }}
+</div>
+<div class="test-horizontal-bar-chart-2">
+    {{ plotly_jinja_data.hbar_chart_exercises_by_weight | safe }}
 </div>
 {% endblock %}
