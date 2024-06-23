@@ -679,7 +679,6 @@ def workoutanalytics():
         title_x=0.5,
     )
 
-
     # scatter-/ line graph: max weight progression by exercise over workouts
     # sql columns: date, muscle group, exercise, weight_kg
     try:
@@ -707,9 +706,6 @@ def workoutanalytics():
     # pd dataframe - weight progression
     df_big6_weight = pd.DataFrame(sql_big6_weight)
     
-    # WIP - user plotly graph objects, instead of plotly express
-    # fig_big6_weight = px.line(df_big6_weight, x='date', y='weight_kg', color='exercise', markers='true')
-
     fig_big6_weight = go.Figure()
 
     for i in df_big6_weight['exercise'].unique():
