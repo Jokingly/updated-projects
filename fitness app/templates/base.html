@@ -18,6 +18,9 @@
         <!-- stylesheet doesn't exist, style from Bootstrap -->
         <link rel="stylesheet" href="static/style.css">
 
+        <!-- provide option to add page specific elements to HTML head -->
+         {% block head %}{% endblock %}
+
         <!-- block to insert respective page's titles -->
         <title>{% block title %}{% endblock %}</title>
     </head>

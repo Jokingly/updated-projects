@@ -142,10 +142,11 @@ SELECT COUNT(*) AS workouts_last_90_days FROM workouts WHERE user_id=1 AND date 
 
 -- index.html total training volume
 SELECT SUM(reps*weight_kg) AS total_volume_lifted
-FROM workouts a
-JOIN sets b ON a.id=b.workout_id
-JOIN exercises c ON b.exercise_id=c.id
-WHERE a.user_id=?;
+FROM workout a
+JOIN workout_set b ON a.id=b.workout_id
+JOIN exercise c ON b.exercise_id=c.id
+WHERE 1=1
+AND a.user_id=1;
 
 
 -- index.html workout history

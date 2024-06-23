@@ -4,6 +4,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import string
 from datetime import datetime
+from dash import Dash, dcc, callback, html, Input, Output
+
 
 # Keeping cs50 SQL, to save from rewriting all SQL queries (query syntax, outputs(dictonaries to list of tuples))
 from cs50 import SQL
@@ -542,7 +544,8 @@ def register_details():
                             date_of_birth = ?,
                             height_cm = ?,
                             weight_kg = ?
-                        WHERE id = ?
+                        WHERE 1=1
+                        AND id = ?
                         ;
                     """,
                     first_name, last_name, date_of_birth, height, weight, user_id)
@@ -555,24 +558,28 @@ def register_details():
 @app.route("/workoutanalytics", methods=["GET", "POST"])
 @login_required
 def workoutanalytics():
-    # ============================= WIP - PLOTLY GRAPH =============================
+    # ============================= WIP - PLOTLY GRAPHS =============================
 
-    user_id = session.get("user_id", None)
+    user_id = session.get("user_id")
 
     # pie chart: sets performed per muscle group of all time
     # sql columns: muscle_group, sets
-    sql_muscle_group_set = db.execute("""
-                                            WITH muscle_group_set AS (
-                                                SELECT mg.name muscle_group, COUNT(*) OVER (PARTITION BY mg.name) sets
-                                                FROM workout_set as ws
-                                                JOIN exercise e ON ws.exercise_id = e.id
-                                                JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
-                                                JOIN muscle_group mg ON emg.muscle_group_id = mg.id
-                                                WHERE ws.user_id = ?                                            
-                                            )
+    try:
+        sql_muscle_group_set = db.execute("""
+                                                WITH muscle_group_set AS (
+                                                    SELECT mg.name muscle_group, COUNT(*) OVER (PARTITION BY mg.name) sets
+                                                    FROM workout_set as ws
+                                                    JOIN exercise e ON ws.exercise_id = e.id
+                                                    JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
+                                                    JOIN muscle_group mg ON emg.muscle_group_id = mg.id
+                                                    WHERE 1=1
+                                                    AND ws.user_id = ?                                            
+                                                )
 
-                                            SELECT * FROM muscle_group_set GROUP BY muscle_group;
-                                            """, user_id)
+                                                SELECT * FROM muscle_group_set GROUP BY muscle_group;
+                                                """, user_id)
+    except Exception as error:
+        print(f"sql_muscle_group_set SQL query error:\n{type(error).__name__}: {error}")
 
     # create pandas dataframe
     df_muscle_group_set = pd.DataFrame(sql_muscle_group_set)
@@ -581,31 +588,39 @@ def workoutanalytics():
     fig_muscle_group_pie = go.Figure()
     fig_muscle_group_pie.add_trace(
         go.Pie(
-            title='All Time Sets Per Muscle Group',
             values=list(df_muscle_group_set.sets),
             labels=list(df_muscle_group_set.muscle_group),
             textinfo='percent+value'
         )
     )
 
+    fig_muscle_group_pie.update_layout(
+        title='All Time Sets Per Muscle Group',
+        title_x=0.5,
+    )
+
     # horizontal bar chart: top 10 exercises by sets, descending, include muscle group in layout
     # sql columns: muscle_group, exercise, sets
     # sql order by asc to show highest value at top of horizontal bar chart
-    sql_exercise_set = db.execute("""
-                                    WITH exercise_set AS (
-                                        SELECT mg.name muscle_group, e.name exercise, COUNT(e.name) sets
-                                        FROM workout_set as ws
-                                        JOIN exercise e ON ws.exercise_id = e.id
-                                        JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
-                                        JOIN muscle_group mg ON emg.muscle_group_id = mg.id
-                                        WHERE ws.user_id = 1
-                                        GROUP BY exercise
-                                        ORDER BY sets ASC
-                                        LIMIT 10
-                                    )
+    try:
+        sql_exercise_set = db.execute("""
+                                        WITH exercise_set AS (
+                                            SELECT mg.name muscle_group, e.name exercise, COUNT(e.name) sets
+                                            FROM workout_set as ws
+                                            JOIN exercise e ON ws.exercise_id = e.id
+                                            JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
+                                            JOIN muscle_group mg ON emg.muscle_group_id = mg.id
+                                            WHERE 1=1
+                                            AND ws.user_id = ?
+                                            GROUP BY exercise
+                                            ORDER BY sets ASC
+                                            LIMIT 10
+                                        )
 
-                                SELECT * FROM exercise_set;
-                                    """)
+                                    SELECT * FROM exercise_set;
+                                        """, user_id)
+    except Exception as error:
+        print(f"sql_exercise_set SQL query error:\n{type(error).__name__}: {error}")
 
     # create pandas dataframe
     df_exercise_set = pd.DataFrame(sql_exercise_set)
@@ -620,22 +635,31 @@ def workoutanalytics():
         )
     )
 
+    hbar_chart_exercises_by_sets.update_layout(
+        title='Top 10 Exercises by Sets',
+        title_x=0.5,
+    )
+
     # horizontal bar chart: top 10 exercises by weight, descending, include muscle group in layout
     # sql columns: muscle_group, exercise, max_weight_kg
     # sql order by asc to show highest value at top of horizontal bar chart
-    sql_exercise_weight = db.execute("""
-                                    WITH exercise_weight AS (
-                                        SELECT mg.name muscle_group, e.name exercise, MAX(ws.weight_kg) OVER (PARTITION BY e.name) max_weight_kg
-                                        FROM workout_set as ws
-                                        JOIN exercise e ON ws.exercise_id = e.id
-                                        JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
-                                        JOIN muscle_group mg ON emg.muscle_group_id = mg.id
-                                        WHERE ws.user_id = 1
-                                        LIMIT 10
-                                    )
+    try:
+        sql_exercise_weight = db.execute("""
+                                        WITH exercise_weight AS (
+                                            SELECT mg.name muscle_group, e.name exercise, MAX(ws.weight_kg) OVER (PARTITION BY e.name) max_weight_kg
+                                            FROM workout_set as ws
+                                            JOIN exercise e ON ws.exercise_id = e.id
+                                            JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
+                                            JOIN muscle_group mg ON emg.muscle_group_id = mg.id
+                                            WHERE 1=1
+                                            AND ws.user_id = ?
+                                            LIMIT 10
+                                        )
 
-                                SELECT * FROM exercise_weight GROUP BY exercise ORDER BY max_weight_kg ASC;
-                                    """)
+                                    SELECT * FROM exercise_weight GROUP BY exercise ORDER BY max_weight_kg ASC;
+                                        """, user_id)
+    except Exception as error:
+        print(f"sql_exercise_weight SQL query error:\n{type(error).__name__}: {error}")    
 
     # create pandas dataframe
     df_exercise_weight = pd.DataFrame(sql_exercise_weight)
@@ -650,42 +674,61 @@ def workoutanalytics():
         )
     )
 
+    hbar_chart_exercises_by_weight.update_layout(
+        title='Top 10 Exercises by Weight',
+        title_x=0.5,
+    )
+
+
     # scatter-/ line graph: max weight progression by exercise over workouts
-    # sql columns: date, exercise, weight_kg
-    # ADD DROPDOWN FOR INTERACTIVE DATA ANALYSIS WITH FigureWidget
-    sql_weight_progression = db.execute("""
-                            WITH set_data AS (
-                                        SELECT w.date date, mg.name muscle_group, e.name exercise, MAX(ws.weight_kg) weight_kg
-                                        FROM workout_set ws      
-                                        JOIN exercise e ON ws.exercise_id = e.id
-                                        JOIN workout w ON ws.workout_id = w.id
-                                        JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
-                                        JOIN muscle_group mg ON emg.muscle_group_id = mg.id
-                                        WHERE ws.user_id = ?
-                                        GROUP BY date, exercise 
-                            )     
-                            
-                            SELECT * FROM set_data;
-                            """, user_id)
+    # sql columns: date, muscle group, exercise, weight_kg
+    try:
+        sql_big6_weight = db.execute("""
+                                WITH set_data AS (
+                                            SELECT w.date date, mg.name muscle_group, e.name exercise, MAX(ws.weight_kg) weight_kg
+                                            FROM workout_set ws      
+                                            JOIN exercise e ON ws.exercise_id = e.id
+                                            JOIN workout w ON ws.workout_id = w.id
+                                            JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
+                                            JOIN muscle_group mg ON emg.muscle_group_id = mg.id
+                                            WHERE 1=1
+                                            AND e.name IN ('Bench Press', 'Overhead Press', 'Barbell Row', 'Pull-Up', 'Squat', 'Deadlift')
+                                            AND ws.user_id = ?
+                                            
+                                            GROUP BY date, exercise 
+                                )     
+                                
+                                SELECT * FROM set_data;
+                                """, user_id)
 
-    df_weight_progression = pd.DataFrame(sql_weight_progression)
+    except Exception as error:
+        print(f"sql_big6_weight SQL query error:\n{type(error).__name__}: {error}")
 
-    # user plotly graph objects, instead of plotly express
-    fig_weight_progression = px.line(df_weight_progression, x='date', y='weight_kg', color='exercise', markers='true')
+    # pd dataframe - weight progression
+    df_big6_weight = pd.DataFrame(sql_big6_weight)
     
-    fig_sets1 = go.Figure()
+    # WIP - user plotly graph objects, instead of plotly express
+    # fig_big6_weight = px.line(df_big6_weight, x='date', y='weight_kg', color='exercise', markers='true')
 
-    fig_sets1.add_trace(
-        go.Scatter(
-            x=list(df_weight_progression.date),
-            y=list(df_weight_progression.weight_kg),
-            name="Weight Progression by Set",
-            line=dict(color="RebeccaPurple")
+    fig_big6_weight = go.Figure()
+
+    for i in df_big6_weight['exercise'].unique():
+        dff = df_big6_weight.query('exercise == @i')
+        fig_big6_weight.add_trace(
+            go.Scatter(
+                x=dff.date,
+                y=dff.weight_kg,
+                name=i,
+            )
         )
+
+    fig_big6_weight.update_layout(
+        title="Big 6 Exercises Weight Progression",
+        title_x=0.5,
     )
 
     plotly_jinja_data = {
-        "fig_weight_progression": fig_weight_progression.to_html(full_html=False), 
+        "fig_big6_weight": fig_big6_weight.to_html(full_html=False), 
         "fig_muscle_group_pie": fig_muscle_group_pie.to_html(full_html=False), 
         "hbar_chart_exercises_by_sets": hbar_chart_exercises_by_sets.to_html(full_html=False),
         "hbar_chart_exercises_by_weight": hbar_chart_exercises_by_weight.to_html(full_html=False)
@@ -693,7 +736,6 @@ def workoutanalytics():
 
     # pass dictionary into render_template, with dictionary with dashboard data as key value pairs?
     return render_template("workout_analytics.html", plotly_jinja_data=plotly_jinja_data)
-
 
 
 @app.route("/workouthistory", methods=["GET", "POST"])
@@ -809,4 +851,6 @@ def search_exercise():
     # python dictionaries are json-serialized by default
     return output
     
-    
+# boilerplate to prevent accidental execution of entire module, if imported by another program
+if __name__ == "__main__":
+    app.run(debug=True)

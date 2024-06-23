@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 
+{% block head %}
+<!-- load workoutanalytics css file -->
+<link rel="stylesheet" href="static/workoutanalytics.css">
+{% endblock %}
+
 {% block title %}Analytics{% endblock%}
 
 {% block main %}
 
-<!-- plotly test -->
-<div class="test-line-graph">
-    {{ plotly_jinja_data.fig_weight_progression | safe }}
+<!-- dash plotly graphs iframe-->
+<!-- move to bottom -->
+<div class="line-graph">
+    {{ plotly_jinja_data.fig_big6_weight | safe }}
 </div>
-<div class="test-pie-chart">
+<div class="pie-chart">
     {{ plotly_jinja_data.fig_muscle_group_pie | safe }}
 </div>
-<div class="test-horizontal-bar-chart-1">
+<div class="horizontal-bar-chart-1">
     {{ plotly_jinja_data.hbar_chart_exercises_by_sets | safe }}
 </div>
-<div class="test-horizontal-bar-chart-2">
+<div class="horizontal-bar-chart-2">
     {{ plotly_jinja_data.hbar_chart_exercises_by_weight | safe }}
 </div>
 {% endblock %}
