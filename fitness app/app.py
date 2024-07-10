@@ -1,10 +1,9 @@
 import math
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 import string
 from datetime import datetime
-from dash import Dash, dcc, callback, html, Input, Output
 
 
 # Keeping cs50 SQL, to save from rewriting all SQL queries (query syntax, outputs(dictonaries to list of tuples))
@@ -558,7 +557,10 @@ def register_details():
 @app.route("/workoutanalytics", methods=["GET", "POST"])
 @login_required
 def workoutanalytics():
-    # ============================= WIP - PLOTLY GRAPHS =============================
+    # using plotly graph library
+
+    # set default template theme to plotly_dark
+    pio.templates.default = "plotly_dark"
 
     user_id = session.get("user_id")
 

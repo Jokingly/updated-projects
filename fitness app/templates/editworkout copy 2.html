@@ -9,7 +9,7 @@
 
 {% block main %}
 
-<!-- weight conversion variables -->
+<!-- weight conversion and default weight description variables -->
 <!-- kg to lbs multiplier  -->
 {% set weight_multiplier = 2.2046226 %}
 <!-- default weight unit is kg -->
@@ -80,13 +80,11 @@
         {% endif %}
 
         <!-- note form -->
-        <form action="/editnote" method="post" class="note-input-form hide" id="note-form" onsubmit="return confirm('Save note changes?')">
-            <textarea name="note" form="note-form"></textarea>
-            <!-- <input type="text" name="note" form="note-form"> -->
+        <form action="/editnote" method="post" class="hide" id="note-form" onsubmit="return confirm('Save note changes?')">
+            <input type="text" name="note" form="note-form">
             <button type="submit" form="note-form" class="btn btn-tertiary-color">
-                Save
                 <!-- Plus symbol -->
-                <!-- <i class="bi bi-plus"></i> -->
+                <i class="bi bi-plus"></i>
             </button>
         </form>
     </div>
@@ -142,56 +140,57 @@
             {% for exercise in workout_exercises %}
 
                 <!-- create a table for each exercise -->
-                <div class="exercise-wrapper" id="current-workout-table">
+                <table class="exercise-table table text-white" id="current-workout-table">
                     <!-- save each exercise's last set dict as last_set jinja2 variable -->
                     {% set last_set = (sets | selectattr('name', 'equalto', exercise) | list | last) %}
                     
-                    <div class="exercise-name-and-add-set-button"> <!-- header row -->
-                        <div colspan="2">{{ exercise.title() }}</div>
-                        <div colspan="1">
+                    <thead class="exercise-name-row">
+                        <th colspan="2">{{ exercise.title() }}</th>
+                        <th colspan="1"></th>
+                        <th colspan="1">
                             <!-- add set button -->
                             <!-- uses last_set variable defined above to extract relevant exercise id -->
                             <button class="btn btn-tertiary-color add-set-button" id="add-set-button{{ last_set.exercise_id }}" value="display-add-set-{{ last_set.exercise_id }}">
                                 Add set
                             </button>
-                        </div>
-                    </div>
+                        </th>
+                    </thead>
 
-                    <div class="d-flex flex-column">
+                    <tbody>
                         <!-- hidden -->
                         <!-- add next set form -->
                         <!-- uses last_set variable defined at the start of loop -->
                         <form action="/editworkout" method="post" id="add-set-{{ last_set.exercise_id }}" class="add-set-{{ last_set.exercise_id }}" autocomplete="off">
-                            <div class="add-set-header-row display-add-set-{{ last_set.exercise_id }} hide">
-                                <div>Set</div>
-                                <div>Reps</div>
-                                <!-- dynamic weight unit description -->
+                            <tr class="display-add-set-{{ last_set.exercise_id }} hide">
+                                <td>Set</td>
+                                <td>Reps</td>
+                                <!-- dynamic weight description -->
                                 {% if profile_data.weight_unit == default_weight %}
-                                    <div>Weight (KG)</div>
+                                    <td>Weight (KG)</td>
                                 {% else %}
-                                    <div>Weight (LBS)</div>
+                                    <td>Weight (LBS)</td>
                                 {% endif %}
-                            </div>
-                            <div class="add-set-input-row display-add-set-{{ last_set.exercise_id }} hide">
+                            </tr>
+                            <tr class="display-add-set-{{ last_set.exercise_id }} hide">
                                 <!-- exercise -->
                                 <!-- hidden and no td tag for formatting purposes -->
                                 <input type="hidden" form="add-set-{{ last_set.exercise_id }}" name="add-user-id" value="{{ last_set.user_id }}">
                                 <input type="hidden" form="add-set-{{ last_set.exercise_id }}" name="add-workout-id" value="{{ last_set.workout_id }}">
                                 <input type="hidden" form="add-set-{{ last_set.exercise_id }}" name="add-exercise-id" id="exercise" value="{{ last_set.exercise_id }}">
                                 
-                                <div>
+                                <td>
                                     <!-- set -->
                                     <input type="number" class="form-control text-center" name="add-set" id="set" form="add-set-{{ last_set.exercise_id }}" value="{{ last_set.exercise_set + 1 }}">
-                                </div>
-                                <div>
+                                </td>
+                                <td>
                                     <!-- reps -->
                                     <input type="number" class="form-control text-center" name="add-reps" id="reps" form="add-set-{{ last_set.exercise_id }}" value="{{ last_set.reps }}">
-                                </div>
-                                <div>
+                                </td>
+                                <td>
                                     <!-- weight (kg) -->
                                     <input type="number" class="form-control text-center" name="add-weight" id="weight" form="add-set-{{ last_set.exercise_id }}" value="{{ last_set.weight_kg }}">
-                                </div>
-                                <div>
+                                </td>
+                                <td>
                                     <!-- cancel button -->
                                     <button type="button" class="btn btn-tertiary-color align-self-center add-set-button btn-margin-and-size" value="display-add-set-{{ last_set.exercise_id }}">
                                         <!-- cross symbol -->
@@ -202,37 +201,38 @@
                                         <!-- plus symbol -->
                                         <i class="bi bi-plus-lg"></i>
                                     </button>
-                                </div>
-                            </div>
+                                </td>
+                            </tr>
                         </form>
 
                         <!-- visible -->
                         <!-- exercise table column headings -->
-                        <div class="column-headings-row "> <!-- column headings row -->
-                            <div scope="col">Set</div>
-                            <div scope="col">Reps</div>
+                        <tr class="column-names-row ">
+                            <th scope="col">Set</th>
+                            <th scope="col">Reps</th>
                             {% if profile_data.weight_unit == default_weight %}
-                                <div scope="col">Weight (KG)</div>
+                                <th scope="col">Weight (KG)</th>
                             {% else %}
-                                <div scope="col">Weight (LBS)</div>
+                                <th scope="col">Weight (LBS)</th>
                             {% endif %}
-                            <div scope="col"></div>
-                        </div>
+                            <th scope="col"></th>
+                        </tr>
 
                         {% for set in sets %}
                             {% if exercise == set.name %}
 
-                                <div class="exercise-data-row display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }}">
-                                    <div>{{ set.exercise_set }}</div>
-                                    <div>{{ set.reps }}</div>
+                                <tr class="exercise-data-row display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }}">
+                                    <td>{{ set.exercise_set }}</td>
+                                    <td>{{ set.reps }}</td>
                                     <!-- dynamic weight conversion -->
                                     {% if profile_data.weight_unit == default_weight %}
-                                        <div>{{ set.weight_kg }}</div>
+                                        <td>{{ set.weight_kg }}</td>
                                     {% else %}
-                                        <div>{{ set.weight_kg * weight_multiplier | round(2) }}</div>
+                                        <td>{{ set.weight_kg * weight_multiplier | round(2) }}</td>
                                     {% endif %}
                                     <!-- delete- and edit set buttons -->
-                                    <div class="data-row-buttons-wrapper">
+                                    <!-- <td class="d-flex justify-content-center"> -->
+                                    <td class="align-btns">
                                         <!-- edit set button (script to show/hide form) -->
                                         <button class="btn btn-tertiary-color edit-set-button btn-margin-and-size" value="display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }}">
                                             <!-- pencil icon -->
@@ -255,13 +255,12 @@
                                             <i class="bi bi-trash3"></i>
                                         </button> -->
 
-                                    </div>
-                                </div>
+                                    </td>
+                                </tr>
                                 
                                 <!-- edit set form -->
-                                 <!-- hidden -->
                                 <form action="/editworkout" method="post" class="#" id="edit-set-{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" autocomplete="off">
-                                    <div class="edit-set-fields display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }} hide">
+                                    <tr class="edit-set-fields display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }} hide">
                                         <!-- exercise -->
                                         <!-- hidden and no td tag for formatting purposes -->
                                         <input type="hidden" form="edit-set-{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="edit-user-id" value="{{ set.user_id }}">
@@ -269,19 +268,19 @@
                                         <input type="hidden" form="edit-set-{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="edit-exercise-id" value="{{ set.exercise_id }}">
                                         <input type="hidden" form="edit-set-{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" name="edit-exercise-set" value="{{ set.exercise_set }}">
                                         
-                                        <div>
+                                        <td>
                                             <!-- set -->
                                             {{ set.exercise_set }}
-                                        </div>
-                                        <div>
+                                        </td>
+                                        <td>
                                             <!-- reps -->
                                             <input type="number" class="form-control text-center" name="edit-reps" id="reps" form="edit-set-{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" value="{{ set.reps }}">
-                                        </div>
-                                        <div>
+                                        </td>
+                                        <td>
                                             <!-- weight (kg) -->
                                             <input type="number" class="form-control text-center" name="edit-weight" id="weight" form="edit-set-{{ set.user_id }}{{ set.workout_id }}{{ set.exercise_id }}{{ set.exercise_set }}" value="{{ set.weight_kg }}">
-                                        </div>
-                                        <div>
+                                        </td>
+                                        <td>
                                             <!-- cancel button -->
                                             <button type="button" class="btn btn-tertiary-color align-self-center edit-set-button btn-margin-and-size" value="display-edit-set-{{ set.exercise_id }}{{ set.exercise_set }}">
                                                 <!-- check icon -->
@@ -292,17 +291,17 @@
                                                 <!-- check icon -->
                                                 <i class="bi bi-check-lg"></i>
                                             </button>
-                                        </div>
-                                    </div>
+                                        </td>
+                                    </tr>
                                 </form>
 
                             {% endif %}
 
                         {% endfor %}
                         
-                    </div>
+                    </tbody>
 
-                </div>
+                </table>
 
             {% endfor %}
     

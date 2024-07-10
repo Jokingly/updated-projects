@@ -18,7 +18,10 @@
         <!-- stylesheet doesn't exist, style from Bootstrap -->
         <link rel="stylesheet" href="static/style.css">
 
-        <!-- provide option to add page specific elements to HTML head -->
+        <!-- 
+            option to add page specific HTML head elements
+            these will have priority, from being loaded last
+        -->
          {% block head %}{% endblock %}
 
         <!-- block to insert respective page's titles -->
@@ -26,7 +29,9 @@
     </head>
 
     <body>
-        <nav class="navbar navbar-expand-lg bg-success" data-bs-theme="dark">
+        <!-- <nav class="navbar navbar-expand-lg bg-success" data-bs-theme="dark"> -->
+        <!-- <nav class="navbar navbar-expand-lg bg-secondary-color" data-bs-theme="dark"> -->
+        <nav class="navbar navbar-expand-lg bg-tertiary-color" data-bs-theme="dark">
             <div class="container-fluid">
                 <a class="navbar-brand" href="/"><span>IronMetrics</span></a>
                 <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
@@ -83,12 +88,14 @@
         </main>
 
         <!-- footer -->
-        <footer class="mb-5 small text-center text-muted">
+        <!-- <footer class="mb-5 small text-center text-muted"> -->
+
+        <footer class="mb-5 small text-center">
             <div>
                 <div class="row">
                     <!-- links -->
                     <div class="col">
-                        <ul>
+                        <ul class="footer-links-list">
                             <li>About</li>
                             <li>Support</li>
                             <li>Contact Us</li>

@@ -1,0 +1,27 @@
+main {
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}
+
+div:has(> .login-form) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.login-form {
+    min-width: 300px;
+    width: 330px;
+}
+
+.login-form button {
+    width: 80%;
+}
+
+.login-button-wrapper {
+    text-align: center;
+}
+

@@ -1,0 +1,13 @@
+.page-item {
+    margin: 0 2.5px;
+}
+
+.workout-history-table {
+    width: 80%;
+    min-width: 500px;
+    margin: 0 auto;
+}
+
+tr * {
+    border-style: none; /* remove white bottom border lines */
+}

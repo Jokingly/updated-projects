@@ -1,0 +1,42 @@
+
+tr * {
+    border-style: none; /* remove white bottom border lines */
+}
+
+.analytics-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.analytics-table {
+    max-width: 280px;
+}
+
+.analytics-table tr td:nth-child(1) {
+    text-align: left;
+}
+
+.analytics-table tr td:nth-child(1):after {
+    content: ":" /* append colon */
+}
+
+.analytics-table tr td:nth-child(2) {
+    text-align: left;
+}
+
+.recent-workouts-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.recent-workouts-table {
+    max-width: 450px;
+}
+
+.recent-workouts-table tr td:nth-child(1),
+.recent-workouts-table tr td:nth-child(2),
+.recent-workouts-table tr td:nth-child(3) {
+    vertical-align: middle;
+}

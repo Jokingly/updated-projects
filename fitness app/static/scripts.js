@@ -24,9 +24,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 break;
 
             // add set fields
-            case e.target.matches('.add-set-button'):
-                const targetElements = document.getElementsByClassName(e.target.value);
+            // .add-set-button * matches descendents of the add-set-button class (.add-set-button) that are elements of any type (*)
+            // the above is to select elements containing symbols within the buttons, that would block show/hide functionality
+            case e.target.matches('.add-set-button, .add-set-button *'):
+                let targetElements = document.getElementsByClassName(e.target.value);
 
+                // if the event target value is undefined, it means that the symbol within the button is being clicked
+                // in this case reassign targetElements to the value of e.target.parentNode.value to grab correct value for show/hide function
+                if (e.target.value === undefined) {
+                    targetElements = document.getElementsByClassName(e.target.parentNode.value);
+                }
+
+                // toggle utility class hide for show/hide functionality
                 for (let element of targetElements) {
                     element.classList.toggle('hide');                    
                 }
@@ -36,6 +45,8 @@ document.addEventListener("DOMContentLoaded", function() {
             case e.target.matches('.edit-set-button, .edit-set-button *'):
                 let targetElems = document.getElementsByClassName(e.target.value);
                 
+                console.log(`edit set target value: ${e.target.value}`)
+
                 if (e.target.value === undefined) {
                     targetElems = document.getElementsByClassName(e.target.parentNode.value);
                 }

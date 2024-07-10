@@ -1,0 +1,14 @@
+tr * {
+    border-style: none; /* remove white bottom border lines */
+}
+
+.profile-data-table-wrapper {
+    width: 30%;
+    min-width: 230px;
+    margin: auto;
+}
+
+.weight-unit-buttons-wrapper {
+    display: flex;
+    justify-content: center;
+}

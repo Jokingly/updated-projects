@@ -8,16 +8,20 @@
 {% block title %}Analytics{% endblock%}
 
 {% block main %}
-<div class="line-graph">
-    {{ plotly_jinja_data.fig_big6_weight | safe }}
+
+<div class="graphs-wrapper">
+    <div class="line-graph">
+        {{ plotly_jinja_data.fig_big6_weight | safe }}
+    </div>
+    <div class="pie-chart">
+        {{ plotly_jinja_data.fig_muscle_group_pie | safe }}
+    </div>
+    <div class="horizontal-bar-chart-1">
+        {{ plotly_jinja_data.hbar_chart_exercises_by_sets | safe }}
+    </div>
+    <div class="horizontal-bar-chart-2">
+        {{ plotly_jinja_data.hbar_chart_exercises_by_weight | safe }}
+    </div>
 </div>
-<div class="pie-chart">
-    {{ plotly_jinja_data.fig_muscle_group_pie | safe }}
-</div>
-<div class="horizontal-bar-chart-1">
-    {{ plotly_jinja_data.hbar_chart_exercises_by_sets | safe }}
-</div>
-<div class="horizontal-bar-chart-2">
-    {{ plotly_jinja_data.hbar_chart_exercises_by_weight | safe }}
-</div>
+
 {% endblock %}

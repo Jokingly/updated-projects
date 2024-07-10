@@ -1,0 +1,136 @@
+/* format datetime background and font color */
+.list-group-item {
+    color: inherit;
+    background-color: transparent;
+}
+
+/*  */
+#workoutinfo {
+    text-align: start;
+}
+
+.edit-note-button, .delete-workout-button {
+    min-width: 140px;
+    margin: 2px 0;
+}
+
+.btn-margin-and-size {
+    width: 41.5px;
+    height: 37.5px;
+    margin: 0 2px;
+}
+
+/* set top and bottom margin for "add new set form" that is always visible */
+#add-set {
+    margin: 20px 0;
+}
+
+/* remove bootstrap default white bottom border lines */
+tr * {
+    border-style: none;
+}
+
+.exercise-name-row {
+    font-size: 1.4rem;
+}
+
+.exercise-data-row {
+    margin-bottom: 10px;
+}
+
+.exercise-data-row div:nth-child(1),
+.exercise-data-row div:nth-child(2),
+.exercise-data-row div:nth-child(3) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.data-row-buttons-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+
+.exercise-table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 80%;
+}
+
+.exercise-table td, .exercise-table th {
+    vertical-align: middle;
+}
+
+.exercises-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.exercise-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.exercise-name-and-add-set-button,
+.column-headings-row,
+.exercise-data-row {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.exercise-name-and-add-set-button {
+    margin-bottom: 10px;
+}
+
+.exercise-name-and-add-set-button div:nth-child(1) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-column: 1 / 2;
+}
+
+.exercise-name-and-add-set-button div:nth-child(2) {
+    grid-column: 4 / 5;
+}
+
+.add-set-header-row {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.add-set-input-row {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.edit-set-fields {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.note-input-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 40%;
+    min-width: 400px;
+    min-height: 200px;
+}
+
+.note-input-form textarea {
+    flex-grow: 1; /* grow this element to occupy remaining free space within its parent element */
+}
+
+
+/* 
+show/hide elements
+position after classes with "display: inline-grid;" is important.
+being the "last processed css", relative to above-mentioned classes, ensures elements with hide class are hidden. 
+*/
+.hide {
+    display: none;
+}

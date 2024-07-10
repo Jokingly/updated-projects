@@ -2,3 +2,16 @@ iframe {
     width: 100%;
     height: 100%;
 }
+
+.line-graph,
+.pie-chart,
+.horizontal-bar-chart-1,
+.horizontal-bar-chart-2 {
+    width: 750px;
+    height: 450px; /* height fixed at 450px per default by plotly library. plotly forum indicates that this seems to be a common limitation. */
+    margin: 20px auto;
+}
+
+.graphs-wrapper {
+
+}

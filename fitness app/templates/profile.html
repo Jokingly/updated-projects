@@ -1,11 +1,22 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <link rel="stylesheet" href="static/profile.css">
+{% endblock %}
+
 {% block title %}{{ session["user_name"] }}'s Profile{% endblock %}
 
 {% block main %}
+
+<!-- weight conversion variables -->
+<!-- kg to lbs multiplier  -->
+{% set weight_multiplier = 2.2046226 %}
+<!-- default weight unit is kg -->
+{% set default_weight = 'kg' %}
+
 <!-- profile info -->
-<div class="container w-25">
-    <table class="table table-sm">
+<div class="profile-data-table-wrapper">
+    <table class="table table-sm text-white">
         <tbody>
             <tr>
                 <td>User ID:</td>
@@ -36,29 +47,35 @@
                 <td>{{ profile_data.height_cm }}</td>
             </tr>
             <tr>
-                <td>Weight(KG):</td>
-                <td>{{ profile_data.weight_kg }}</td>
+                <!-- dynamic weight unit description and conversion-->
+                {% if profile_data.weight_unit == default_weight %}
+                    <td>Weight(KG):</td>
+                    <td>{{ profile_data.weight_kg }}</td>
+                {% else %}
+                    <td>Weight(LBS):</td>
+                    <td>{{ profile_data.weight_kg * weight_multiplier | round(2) }}</td>
+                {% endif %}
             </tr>
             <tr>
                 <td>Weight Unit:</td>
-                <td>
+                <td class="weight-unit-buttons-wrapper">
                     {% if profile_data.weight_unit == "kg" %}
                         <form action="/profile" method="post" id="kg_form">
                             <input type="hidden" form="kg_form" name="kg" value="kg">
-                            <button type="submit" form="kg_form" disabled>KG</button>
+                            <button type="submit" form="kg_form" class="btn btn-tertiary-color" disabled>KG</button>
                         </form>
                         <form action="/profile" method="post" id="lbs_form">
                             <input type="hidden" form="lbs_form" name="lbs" value="lbs">
-                            <button type="submit" form="lbs_form">LBS</button>
+                            <button type="submit" form="lbs_form" class="btn btn-tertiary-color">LBS</button>
                         </form>
                     {% else %}
                         <form action="/profile" method="post" id="kg_form">
                             <input type="hidden" form="kg_form" name="kg" value="kg">
-                            <button type="submit" form="kg_form">KG</button>
+                            <button type="submit" form="kg_form" class="btn btn-tertiary-color">KG</button>
                         </form>
                         <form action="/profile" method="post" id="lbs_form">
                             <input type="hidden" form="lbs_form" name="lbs" value="lbs">
-                            <button type="submit" form="lbs_form" disabled>LBS</button>
+                            <button type="submit" form="lbs_form" class="btn btn-tertiary-color" disabled>LBS</button>
                         </form>
                     {% endif %}
                 </td>
@@ -66,18 +83,11 @@
         </tbody>
     </table>
 </div>
-<!-- change measurement units -->
-<!-- (kg - lbs, 24 hour system - 12 hour system) -->
-<div>
-    <!-- kg - lbs -->
-    <form>
 
-    </form>
-</div>
 <!-- buttons -->
 <div class="container">
-        <button type="button" class="btn btn-success" onclick="history.back()">Back</button>
-        <a href="/editprofile" class="btn btn-success">Edit Profile</a>
-        <a href="/changepassword" class="btn btn-success">Change Password</a>
+        <button type="button" class="btn btn-tertiary-color" onclick="history.back()">Back</button>
+        <a href="/editprofile" class="btn btn-tertiary-color">Edit Profile</a>
+        <a href="/changepassword" class="btn btn-tertiary-color">Change Password</a>
 </div>
 {% endblock %}
