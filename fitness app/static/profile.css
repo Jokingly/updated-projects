@@ -5,7 +5,8 @@ tr * {
 .profile-data-table-wrapper {
     width: 30%;
     min-width: 230px;
-    margin: auto;
+    margin: 25px auto;
+    padding: 25px 0;
 }
 
 .weight-unit-buttons-wrapper {

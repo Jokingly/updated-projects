@@ -7,11 +7,12 @@
 {% block title %}Workout History{% endblock %}
 
 {% block main %}
-<div class="container workout-history-table-wrapper">
+<!-- <div class="container workout-history-table-wrapper"> -->
+<div class="container workout-history-container">
     <h3>Workout History</h3>
 
     <!-- Top pagination -->
-    <nav aria-label="Top workout history page navigation">
+    <nav class="pagination-buttons" aria-label="Top workout history page navigation">
         <ul class="pagination justify-content-center">
           <li class="page-item">
             <form action="/workouthistory" method="post" id="prev-page" style="display: inline;">
@@ -36,48 +37,50 @@
         </ul>
     </nav>
 
-    <!-- workout history table -->
-    <table class="table text-white workout-history-table">
-        <thead>
-            <tr>
-                <!-- date heading with filter button -->
-                <th>
-                  Date
-                  <form action="/workouthistory" method="post" id="date-sort" style="display: inline;">
-                    <input type="hidden" name="date-sort" form="date-sort">
-                    <button type="submit" form="date-sort" class="bi bi-arrow-down-up" style="color: white; border: none; background-color: inherit; padding: inherit; display: inline-block;"></button>
-                  </form>
-                </th>
-                <!-- <th>Date</th> -->
-                <th>Start</th>
-                <th>End</th>
-                <!-- empty cell for consistent formatting with table body -->
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for workout in workout_history %}
-                <tr>
-                    <td>{{ workout.date }}</td>
-                    <td>{{ workout.start_time }}</td>
-                    <td>{{ workout.end_time }}</td>
-                    <td>
-                        <form action="/workouthistory" method="post" id="edit-workout{{ workout.id }}" style="display: inline;">
-                            <input type="hidden" name="edit-workout-id" form="edit-workout{{ workout.id }}" value="{{ workout.id }}">
-                            <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-tertiary-color">View</button>
-                        </form>
-                        <form action="/workouthistory" method="post" id="delete-workout{{ workout.id }}" style="display: inline;">
-                            <input type="hidden" name="delete-workout-id" form="delete-workout{{ workout.id }}" value="{{ workout.id }}">
-                            <button type="submit" form="delete-workout{{ workout.id }}" class="btn btn-tertiary-color">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="workout-history-table-wrapper secondary-color-background">
+      <!-- workout history table -->
+      <table class="table text-white workout-history-table">
+          <thead>
+              <tr>
+                  <!-- date heading with filter button -->
+                  <th>
+                    Date
+                    <form action="/workouthistory" method="post" id="date-sort" style="display: inline;">
+                      <input type="hidden" name="date-sort" form="date-sort">
+                      <button type="submit" form="date-sort" class="bi bi-arrow-down-up" style="color: white; border: none; background-color: inherit; padding: inherit; display: inline-block;"></button>
+                    </form>
+                  </th>
+                  <!-- <th>Date</th> -->
+                  <th>Start</th>
+                  <th>End</th>
+                  <!-- empty cell for consistent formatting with table body -->
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for workout in workout_history %}
+                  <tr>
+                      <td>{{ workout.date }}</td>
+                      <td>{{ workout.start_time }}</td>
+                      <td>{{ workout.end_time }}</td>
+                      <td>
+                          <form action="/workouthistory" method="post" id="edit-workout{{ workout.id }}" style="display: inline;">
+                              <input type="hidden" name="edit-workout-id" form="edit-workout{{ workout.id }}" value="{{ workout.id }}">
+                              <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-tertiary-color">View</button>
+                          </form>
+                          <form action="/workouthistory" method="post" id="delete-workout{{ workout.id }}" style="display: inline;">
+                              <input type="hidden" name="delete-workout-id" form="delete-workout{{ workout.id }}" value="{{ workout.id }}">
+                              <button type="submit" form="delete-workout{{ workout.id }}" class="btn btn-tertiary-color">Delete</button>
+                          </form>
+                      </td>
+                  </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+    </div>
 
     <!-- bottom pagination -->
-    <nav aria-label="Bottom workout history page navigation">
+    <nav class="pagination-buttons" aria-label="Bottom workout history page navigation">
       <ul class="pagination justify-content-center">
         <li class="page-item">
           <form action="/workouthistory" method="post" id="prev-page" style="display: inline;">

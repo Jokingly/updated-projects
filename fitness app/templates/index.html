@@ -10,96 +10,100 @@
 {% block main %}
 
 <div class="container text-center mb-3 analytics-wrapper">
-    <h3>Workout Analytics</h3>
-    <table class="table table-sm text-white analytics-table">
-        <tbody>
-            <tr>
-                <td>
-                    Average Workout Duration
-                </td>
-                <td>
-                    {{ dashboard.avg_workout_duration_min }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Days Since Last Workout
-                </td>
-                <td>
-                    {{ dashboard.days_since_last_workout }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Total Volume Lifted (KG)
-                </td>
-                <td>
-                    {{ dashboard.total_volume_lifted }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Workouts In Last 7 Days
-                </td>
-                <td>
-                    {{ dashboard.workouts_last_7_days }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Workouts In Last 30 Days
-                </td>
-                <td>
-                    {{ dashboard.workouts_last_30_days }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Workouts In Last 90 Days
-                </td>
-                <td>
-                    {{ dashboard.workouts_last_90_days }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="analytics-table-wrapper secondary-color-background">
+        <h3>Workout Analytics</h3>
+        <table class="table table-sm text-white analytics-table">
+            <tbody>
+                <tr>
+                    <td>
+                        Average Workout Duration
+                    </td>
+                    <td>
+                        {{ dashboard.avg_workout_duration_min }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Days Since Last Workout
+                    </td>
+                    <td>
+                        {{ dashboard.days_since_last_workout }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Total Volume Lifted (KG)
+                    </td>
+                    <td>
+                        {{ dashboard.total_volume_lifted }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Workouts In Last 7 Days
+                    </td>
+                    <td>
+                        {{ dashboard.workouts_last_7_days }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Workouts In Last 30 Days
+                    </td>
+                    <td>
+                        {{ dashboard.workouts_last_30_days }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Workouts In Last 90 Days
+                    </td>
+                    <td>
+                        {{ dashboard.workouts_last_90_days }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <br>
 
 <!-- add edit and delete button -->
 <div class="container recent-workouts-wrapper">
-    <h3>Most Recent Workouts</h3>
-    <table class="table text-white recent-workouts-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Start</th>
-                <th>End</th>
-                <!-- empty cell for consistent table formatting -->
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for workout in workout_history %}
+    <div class="recent-workouts-table-wrapper secondary-color-background">
+        <h3>Most Recent Workouts</h3>
+        <table class="table text-white recent-workouts-table">
+            <thead>
                 <tr>
-                    <td>{{ workout.date }}</td>
-                    <td>{{ workout.start_time }}</td>
-                    <td>{{ workout.end_time }}</td>
-                    <td>
-                        <form action="/" method="post" style="display: inline;" id="edit-workout{{ workout.id }}">
-                            <input type="hidden" name="edit-workout-id" form="edit-workout{{ workout.id }}" value="{{ workout.id }}">
-                            <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-tertiary-color">View</button>
-                        </form>
-                        <form action="/deleteworkout" method="post" id="delete-workout{{ workout.id }}" onsubmit="return confirm('Irreversibly delete workout?')" style="display: inline;">
-                            <input type="hidden" name="delete-workout-id" form="delete-workout{{ workout.id }}" value="{{ workout.id }}">
-                            <button type="submit" form="delete-workout{{ workout.id }}" class="btn btn-tertiary-color">Delete</button>
-                        </form>
-                    </td>
+                    <th>Date</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <!-- empty cell for consistent table formatting -->
+                    <th></th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for workout in workout_history %}
+                    <tr>
+                        <td>{{ workout.date }}</td>
+                        <td>{{ workout.start_time }}</td>
+                        <td>{{ workout.end_time }}</td>
+                        <td>
+                            <form action="/" method="post" style="display: inline;" id="edit-workout{{ workout.id }}">
+                                <input type="hidden" name="edit-workout-id" form="edit-workout{{ workout.id }}" value="{{ workout.id }}">
+                                <button type="submit" form="edit-workout{{ workout.id }}" class="btn btn-tertiary-color">View</button>
+                            </form>
+                            <form action="/deleteworkout" method="post" id="delete-workout{{ workout.id }}" onsubmit="return confirm('Irreversibly delete workout?')" style="display: inline;">
+                                <input type="hidden" name="delete-workout-id" form="delete-workout{{ workout.id }}" value="{{ workout.id }}">
+                                <button type="submit" form="delete-workout{{ workout.id }}" class="btn btn-tertiary-color">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
 

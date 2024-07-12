@@ -16,7 +16,7 @@
 {% set default_weight = 'kg' %}
 
 
-<div class="container workoutinfo-container" id="workoutinfo">
+<div class="container workoutinfo-container secondary-color-background" id="workoutinfo">
     <!-- top row wrapper - workout info & delete workout button -->
     <div>
         <!-- workout info wrapper -->
@@ -90,10 +90,7 @@
             </button>
         </form>
     </div>
-</div>
-
-
-<div class="container workout-data-container">
+    
     <!-- add exercise form -->
     <form action="/editworkout" method="post" class="#" id="add-set" autocomplete="off">
         <div class="row row-cols-5">
@@ -134,6 +131,11 @@
             </div>
         </div>
     </form>
+</div>
+
+
+<div class="container workout-data-container">
+
 
 
     <!-- exercises wrapper -->
@@ -142,7 +144,7 @@
             {% for exercise in workout_exercises %}
 
                 <!-- create a table for each exercise -->
-                <div class="exercise-wrapper" id="current-workout-table">
+                <div class="exercise-wrapper secondary-color-background" id="current-workout-table">
                     <!-- save each exercise's last set dict as last_set jinja2 variable -->
                     {% set last_set = (sets | selectattr('name', 'equalto', exercise) | list | last) %}
                     

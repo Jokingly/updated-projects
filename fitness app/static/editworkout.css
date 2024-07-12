@@ -4,6 +4,11 @@
     background-color: transparent;
 }
 
+.workoutinfo-container {
+    padding: 25px;
+    margin: 25px auto;
+}
+
 /*  */
 #workoutinfo {
     text-align: start;
@@ -51,7 +56,6 @@ tr * {
     justify-content: center;
 }
 
-
 .exercise-table {
     table-layout: fixed;
     border-collapse: collapse;
@@ -73,6 +77,7 @@ tr * {
     flex-direction: column;
     width: 100%;
     margin-bottom: 30px;
+    padding: 25px 0;
 }
 
 .exercise-name-and-add-set-button,
@@ -124,7 +129,6 @@ tr * {
 .note-input-form textarea {
     flex-grow: 1; /* grow this element to occupy remaining free space within its parent element */
 }
-
 
 /* 
 show/hide elements

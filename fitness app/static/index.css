@@ -9,6 +9,14 @@ tr * {
     align-items: center;
 }
 
+.analytics-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 500px;
+}
+
 .analytics-table {
     max-width: 280px;
 }
@@ -31,6 +39,14 @@ tr * {
     align-items: center;
 }
 
+.recent-workouts-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 500px;
+}
+
 .recent-workouts-table {
     max-width: 450px;
 }
@@ -39,4 +55,12 @@ tr * {
 .recent-workouts-table tr td:nth-child(2),
 .recent-workouts-table tr td:nth-child(3) {
     vertical-align: middle;
+}
+
+h3 {
+    margin-top: 25px;
+}
+
+table {
+    margin-bottom: 25px;
 }

@@ -45,6 +45,13 @@ body {
     background: var(--tertiary-color);
 }
 
+/* set background to secondary color with rounded corners */
+.secondary-color-background {
+    border-radius: 25px;
+    background-color: var(--secondary-color)
+}
+
+/* override bootstrap buttons */
 .btn-tertiary-color {
     --test1: #cf3f7b;
     --test2: #f5478f;
